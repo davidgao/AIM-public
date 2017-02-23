@@ -24,4 +24,13 @@
 
 .globl _start
 _start:
+	cli
+	cld
 
+	mov	$kstack_top, %esp
+	xor	%eax, %eax
+	push	%eax
+	push	%eax
+	mov	%esp, %ebp
+
+	call	master_early_init
