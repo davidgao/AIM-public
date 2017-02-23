@@ -29,3 +29,36 @@
 
 ENTRY(_start)
 
+MEMORY
+{
+	MBR (rwx) :
+		ORIGIN = 0x7C00,
+		LENGTH = 446
+	BSS (rw) :
+		ORIGIN = 0x7E00,
+		LENGTH = 77200
+}
+
+SECTIONS
+{
+	.text : {
+		/* entry comes first */
+		PROVIDE(stacktop = .);
+		PROVIDE(mbr = .);
+		*(.entry);
+		/* everything else */
+		*(.text);
+		*(.rodata);
+		*(.data);
+	} > MBR
+
+	.bss : {
+		PROVIDE(bss_start = .);
+		*(.bss);
+		PROVIDE(bss_end = .);
+	} > BSS
+    
+	/DISCARD/ : {
+		*(.eh_frame);
+	}
+}
