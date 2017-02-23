@@ -25,6 +25,8 @@
 #include <elf.h>
 #include <asm.h>
 
+#define SECT_SIZE	512
+
 struct elfhdr * ELFHDR = ((struct elfhdr *)0x10000);
 
 static void waitdisk(void) {
