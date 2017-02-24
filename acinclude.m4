@@ -175,7 +175,8 @@ AC_DEFUN([AIM_SUPPORT_MACH], [
 AC_DEFUN([AIM_REQUIRE_COMPILE_FLAG], [
 	AX_CHECK_COMPILE_FLAG(
 		$1,
-		[AS_VAR_APPEND([AIM_CFLAGS], [$1][" "])],
+		# [AS_VAR_APPEND([AIM_CFLAGS], [$1][" "])],
+		[AIM_CFLAGS += [$1][" "]],
 		[echo "cc does not support $1" && exit 1]
 	)
 ])
