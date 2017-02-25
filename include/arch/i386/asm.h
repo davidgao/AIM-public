@@ -31,7 +31,13 @@ uint16_t inw(uint16_t port)
 }
 
 static inline
-uint32_t insl(uint16_t port)
+uint32_t inl(uint16_t port)
+{
+	return 0;
+}
+
+static inline
+void insl(int port, void *addr, int cnt)
 {
 	asm volatile (
             "cld;"

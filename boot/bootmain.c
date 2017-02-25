@@ -27,7 +27,7 @@
 
 #define SECT_SIZE	512
 
-struct elfhdr * ELFHDR = ((struct elfhdr *)0x10000);
+elf_hdr * ELFHDR = (elf_phdr *)0x10000;
 
 static void waitdisk(void) {
     while ((inb(0x1F7) & 0xC0) != 0x40);
@@ -65,15 +65,16 @@ void bootmain(void)
 {
 	readseg((uintptr_t)ELFHDR, SECT_SIZE * 8, 0);
 
-    struct proghdr *ph, *eph;
+    elf_phdr *ph, *eph;
 
-    ph = (struct proghdr *)((uintptr_t)ELFHDR + ELFHDR->e_phoff);
+    ph = (elf_phdr *)((uintptr_t)ELFHDR + ELFHDR->e_phoff);
     eph = ph + ELFHDR->e_phnum;
     for (; ph < eph; ph ++) {
-        readseg(ph->p_va & 0xFFFFFF, ph->p_memsz, ph->p_offset);
+        readseg((uintptr_t) (ph->p_paddr & 0xFFFFFF), ph->p_memsz, ph->p_offset);
     }
 
-    ((void (*)(void))(ELFHDR->e_entry)();
+	void (*kernel_entry)(void) = (void (*)(void))(ELFHDR->e_entry);
+    kernel_entry();
 
 bad:
 	while (1);
