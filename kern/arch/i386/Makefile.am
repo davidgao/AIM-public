@@ -27,5 +27,6 @@ libentry_la_SOURCES = \
 	entry.S
 
 libarch_la_SOURCES = \
-	arch_early_init.c
+	arch_early_init.c \
+	arch_mmu.c
 

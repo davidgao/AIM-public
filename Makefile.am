@@ -26,6 +26,7 @@ endif
 SUBDIRS = \
 	include \
 	lib \
+	drivers \
 	$(BOOT) \
 	kern
 

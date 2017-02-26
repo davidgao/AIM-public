@@ -242,18 +242,26 @@ AC_CONFIG_FILES([
 	boot/arch/armv7a/Makefile
 	boot/arch/i386/Makefile
 	boot/arch/mips/Makefile
+	drivers/Makefile
+	drivers/io/Makefile
+	drivers/serial/Makefile
 	include/Makefile
 	include/aim/Makefile
 	include/arch/Makefile
 	include/arch/armv7a/Makefile
 	include/arch/i386/Makefile
 	include/arch/mips/Makefile
+	include/arch/mips/mach-loongson3a/Makefile
 	kern/Makefile
 	kern/arch/Makefile
 	kern/arch/armv7a/Makefile
 	kern/arch/i386/Makefile
 	kern/arch/mips/Makefile
+	kern/dev/Makefile
 	kern/init/Makefile
+	kern/mm/Makefile
+	kern/mm/kmmap/Makefile
+	kern/panic/Makefile
 	lib/Makefile
 	lib/libc/Makefile
 ])

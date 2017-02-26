@@ -1,4 +1,5 @@
 # Copyright (C) 2016 David Gao <davidgao1001@gmail.com>
+# Copyright (C) 2016 Gan Quan <coin2028@hotmail.com>
 #
 # This file is part of AIM.
 #
@@ -17,26 +18,23 @@
 
 include $(top_srcdir)/env.am
 
-noinst_LTLIBRARIES = \
-	libc-nopic.la \
-	libc.la
+SUBDIRS = \
+	io \
+	serial
 
-SRCS = \
-	memset.c \
-	snprintf.c \
-	strcmp.c
+noinst_LTLIBRARIES = libdrivers-raw.la libdrivers.la
 
-noinst_HEADERS = \
-	stdarg.h \
-	stddef.h \
-	stdio.h \
-	string.h
+libdrivers_raw_la_SOURCES =
+libdrivers_raw_la_LIBADD = \
+	io/libio-raw.la \
+	serial/libserial-raw.la
+libdrivers_raw_la_CPPFLAGS = $(AM_CPPFLAGS_NOPIC)
+libdrivers_raw_la_CFLAGS = $(AM_CFLAGS_NOPIC)
+libdrivers_raw_la_CCASFLAGS = $(AM_CCASFLAGS_NOPIC)
+libdrivers_raw_la_LDFLAGS = $(AM_LDFLAGS_NOPIC)
 
-libc_nopic_la_SOURCES = $(SRCS)
-libc_nopic_la_CPPFLAGS = $(AM_CPPFLAGS_NOPIC)
-libc_nopic_la_CFLAGS = $(AM_CFLAGS_NOPIC)
-libc_nopic_la_CCASFLAGS = $(AM_CCASFLAGS_NOPIC)
-libc_nopic_la_LDFLAGS = $(AM_LDFLAGS_NOPIC)
-
-libc_la_SOURCES = $(SRCS)
+libdrivers_la_SOURCES =
+libdrivers_la_LIBADD = \
+	io/libio.la \
+	serial/libserial.la
 

@@ -1,4 +1,5 @@
 # Copyright (C) 2016 David Gao <davidgao1001@gmail.com>
+# Copyright (C) 2016 Gan Quan <coin2028@hotmail.com>
 #
 # This file is part of AIM.
 #
@@ -15,28 +16,13 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-include $(top_srcdir)/env.am
+MODULES =
 
-noinst_LTLIBRARIES = \
-	libc-nopic.la \
-	libc.la
+################
+# UART serials #
+################
 
-SRCS = \
-	memset.c \
-	snprintf.c \
-	strcmp.c
-
-noinst_HEADERS = \
-	stdarg.h \
-	stddef.h \
-	stdio.h \
-	string.h
-
-libc_nopic_la_SOURCES = $(SRCS)
-libc_nopic_la_CPPFLAGS = $(AM_CPPFLAGS_NOPIC)
-libc_nopic_la_CFLAGS = $(AM_CFLAGS_NOPIC)
-libc_nopic_la_CCASFLAGS = $(AM_CCASFLAGS_NOPIC)
-libc_nopic_la_LDFLAGS = $(AM_LDFLAGS_NOPIC)
-
-libc_la_SOURCES = $(SRCS)
+if UART_NS16550
+MODULES += $(top_builddir)/drivers/serial/uart-ns16550.o
+endif
 

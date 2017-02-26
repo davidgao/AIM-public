@@ -1,6 +1,6 @@
 # Copyright (C) 2016 David Gao <davidgao1001@gmail.com>
 #
-# This file is part of AIM.
+# This program is part of AIM.
 #
 # AIM is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,26 +17,26 @@
 
 include $(top_srcdir)/env.am
 
-noinst_LTLIBRARIES = \
-	libc-nopic.la \
-	libc.la
+noinst_LTLIBRARIES = libio-raw.la libio.la
+noinst_HEADERS =
 
-SRCS = \
-	memset.c \
-	snprintf.c \
-	strcmp.c
+SRCS = 
 
-noinst_HEADERS = \
-	stdarg.h \
-	stddef.h \
-	stdio.h \
-	string.h
+if IO_MEM
+SRCS += io-mem.c
+noinst_HEADERS += io-mem.h
+endif
 
-libc_nopic_la_SOURCES = $(SRCS)
-libc_nopic_la_CPPFLAGS = $(AM_CPPFLAGS_NOPIC)
-libc_nopic_la_CFLAGS = $(AM_CFLAGS_NOPIC)
-libc_nopic_la_CCASFLAGS = $(AM_CCASFLAGS_NOPIC)
-libc_nopic_la_LDFLAGS = $(AM_LDFLAGS_NOPIC)
+if IO_PORT
+SRCS += io-port.c
+noinst_HEADERS += io-port.h
+endif
 
-libc_la_SOURCES = $(SRCS)
+libio_raw_la_SOURCES = $(SRCS)
+libio_raw_la_CPPFLAGS = $(AM_CPPFLAGS_NOPIC)
+libio_raw_la_CFLAGS = $(AM_CFLAGS_NOPIC)
+libio_raw_la_CCASFLAGS = $(AM_CCASFLAGS_NOPIC)
+libio_raw_la_LDFLAGS = $(AM_LDFLAGS_NOPIC)
+
+libio_la_SOURCES = $(SRCS)
 
