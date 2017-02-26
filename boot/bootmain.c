@@ -27,6 +27,8 @@
 
 #define SECT_SIZE	512
 
+uint8_t *mbr;
+
 elf_hdr * ELFHDR = (elf_phdr *)0x10000;
 
 static void waitdisk(void) {
@@ -63,14 +65,20 @@ static void readseg(uintptr_t va, uint32_t count, uint32_t offset) {
 __noreturn
 void bootmain(void)
 {
-	readseg((uintptr_t)ELFHDR, SECT_SIZE * 8, 0);
+	mbr = (uint8_t *)(0x7c00 + 0x1ce);
+    uint32_t hd_offs = (*(uint32_t *)(mbr + 8)) * SECT_SIZE; 
+
+	readseg((uintptr_t)ELFHDR, SECT_SIZE * 8, hd_offs);
 
     elf_phdr *ph, *eph;
 
     ph = (elf_phdr *)((uintptr_t)ELFHDR + ELFHDR->e_phoff);
     eph = ph + ELFHDR->e_phnum;
     for (; ph < eph; ph ++) {
-        readseg((uintptr_t) (ph->p_paddr & 0xFFFFFF), ph->p_memsz, ph->p_offset);
+        readseg((uintptr_t) ph->p_paddr, ph->p_memsz, ph->p_offset + hd_offs);
+
+		if(ph->p_memsz > ph->p_filesz)
+            stosb(pa + ph->p_filesz, 0, ph->p_memsz - ph->p_filesz);
     }
 
 	void (*kernel_entry)(void) = (void (*)(void))(ELFHDR->e_entry);
