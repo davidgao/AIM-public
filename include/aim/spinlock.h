@@ -1,14 +1,10 @@
 struct spinlock {
-  uint32_t locked;       // Is the lock held?
+  uint32_t locked;
 
   // For debugging:
   
   char *name;        // Name of lock
   
-  /*    TODO: skip cpu for now
-  struct cpu *cpu;   // The cpu holding the lock.
-  uint32_t pcs[10];      // The call stack (an array of program counters)
-  */
                      // that locked the lock.
 };
 

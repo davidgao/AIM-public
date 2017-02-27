@@ -48,28 +48,11 @@ int page_index_early_map(pgindex_t *boot_page_index, addr_t paddr,
     }
     return end - va;
 }
-/*
-static int set_early_pages_perm(pgindex_t *boot_page_index, void *va, 
-    void *end, uint32_t perm) {
-    pte_t *pte;
-    for(; va < end; va += PGSIZE) {
-        pte = (pte_t *)&boot_page_index[PDX(va)];
-        *pte = (uint32_t)(PTE_ADDR(*pte) | PTE_FLAGS(perm));
-    }
-    return end - va;
-}
-*/
+
 // Set up linear mapping for early mapping
 void early_mm_init(void) {
     // user space usage not allowed, only kernel is mapped
     page_index_early_map(entrypgdir, (addr_t)0, (void *)KERN_BASE, PHYSTOP - 0);
-    
-    // set kernel text section readable only
-    /*
-    extern uint32_t __text_start_kern, __text_end_kern;
-    set_early_pages_perm(entrypgdir, &__text_start_kern, 
-        &__text_end_kern, PTE_P | PTE_PS);
-    */
     
     // invalidate low addr pages (user space)
     page_index_clear(entrypgdir);
