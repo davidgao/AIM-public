@@ -30,6 +30,9 @@
 #include <drivers/io/io-mem.h>
 #include <drivers/io/io-port.h>
 #include <platform.h>
+#include "aim/kalloc.h"
+
+void set_cr_mmu();
 
 static inline
 int early_devices_init(void)
@@ -57,6 +60,7 @@ void master_early_init(void)
 		goto panic;
 	/* other preperations, including early secondary buses */
 	arch_early_init();
+	set_cr_mmu();
 	if (early_console_init(
 		EARLY_CONSOLE_BUS,
 		EARLY_CONSOLE_BASE,
@@ -71,3 +75,12 @@ panic:
 	while (1);
 }
 
+void inf_loop() {
+    while(1);
+}
+
+void continue_early_init(void) {
+    early_mm_init();
+    
+    inf_loop();
+}

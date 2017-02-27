@@ -85,3 +85,6 @@ msim.conf
 # patch(1) remnants
 *.orig
 *.rej
+
+#IDE
+.vscode/

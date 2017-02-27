@@ -23,6 +23,8 @@
 
 void arch_early_init(void);
 
+void sleep1();  // from each arch
+
 #endif /* !__ASSEMBLER__ */
 
 #endif /* !_AIM_INIT_H */

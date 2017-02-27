@@ -16,6 +16,54 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _ARCH_ASM_H
+#define _ARCH_ASM_H
+
+#define SEG_NULLASM                                             \
+        .word 0, 0;                                             \
+        .byte 0, 0, 0, 0
+
+// The 0xC0 means the limit is in 4096-byte units
+// and (for executable segments) 32-bit mode.
+#define SEG_ASM(type,base,lim)                                  \
+        .word (((lim) >> 12) & 0xffff), ((base) & 0xffff);      \
+        .byte (((base) >> 16) & 0xff), (0x90 | (type)),         \
+                (0xC0 | (((lim) >> 28) & 0xf)), (((base) >> 24) & 0xff)
+
+#define STA_X     0x8       // Executable segment
+#define STA_E     0x4       // Expand down (non-executable segments)
+#define STA_C     0x4       // Conforming code segment (executable only)
+#define STA_W     0x2       // Writeable (non-executable segments)
+#define STA_R     0x2       // Readable (executable segments)
+#define STA_A     0x1       // Accessed 
+
+#ifndef __ASSEMBLER__
+
+static inline void
+cli(void)
+{
+  asm volatile("cli");
+}
+
+static inline void
+sti(void)
+{
+  asm volatile("sti");
+}
+
+static inline uint32_t
+xchg(volatile uint32_t *addr, uint32_t newval)
+{
+  uint32_t result;
+
+  // The + in "+m" denotes a read-modify-write operand.
+  asm volatile("lock; xchgl %0, %1" :
+               "+m" (*addr), "=a" (result) :
+               "1" (newval) :
+               "cc");
+  return result;
+}
+
 static inline
 uint8_t inb(uint16_t port)
 {
@@ -73,3 +121,5 @@ stosb(void *addr, int data, int cnt)
                "memory", "cc");
 }
 
+#endif
+#endif

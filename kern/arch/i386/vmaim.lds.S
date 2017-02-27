@@ -16,6 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
@@ -27,25 +28,41 @@
  * linker script.
  */
 
-ENTRY(_start)
-
+ENTRY(kern_entry)
 SECTIONS
 {
-	. = KERN_START;
+    // Note: config define KERN_START as 0x01000000
+    // or KERN_BASE 0x80000000
 
-	.text : {
-		*(.text);
-	}
+	. = KERN_BASE + 0x100000;
+    __text_start_kern = .;
+	.text   : AT(0x100000) {*(.text);}
+	__text_end_kern = .;
+	
+	// . = ALIGN(1024 * 1024 * 4); // ensure seperate pages even in 4M paging
+	.data   : 
+	    // AT(LOADADDR(.text) + SIZEOF(.text)) 
+	    {*(.data);}
 
-	.data : {
-		*(.data);
-	}
+    .rodata :
+        // AT(LOADADDR(.bss) + SIZEOF(.bss)) 
+        {*(.rodata);}
 
-	.bss : {
-		*(.bss);
-		. = ALIGN(4096);
-		PROVIDE(kstack = .);
-		. += KSTACKSIZE;
-		PROVIDE(kstack_top = .);
-	}
+	.bss    : 
+	    // AT(LOADADDR(.data) + SIZEOF(.data))
+	{
+        __bss_start_kern = .; 
+        *(.bss);
+        . = ALIGN(4096);
+        PROVIDE(__kstack_base = .); 
+        // using PROVIDE to get glb var
+        . += KSTACKSIZE;
+        // Note: config defines KSTACKSIZE as 32768(0x8000)
+        PROVIDE(__kstack_top = .);
+        __bss_end_kern = .;
+    }
+
+	.end = .;
+	PROVIDE(__end = .);
+	
 }

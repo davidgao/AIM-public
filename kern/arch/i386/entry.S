@@ -22,15 +22,23 @@
 
 .text
 
-.globl _start
-_start:
-	cli
-	cld
+.globl master_early_entry
 
-	mov	$kstack_top, %esp
-	xor	%eax, %eax
-	push	%eax
-	push	%eax
-	mov	%esp, %ebp
+.globl kern_entry
+kern_entry = master_early_entry - KERN_BASE
 
-	call	master_early_init
+master_early_entry:
+    cli     // no interrupt
+    cld
+
+    mov	$__kstack_top - KERN_BASE, %esp
+    xor	%eax, %eax
+    push	%eax		// eip=0
+    push	%eax		// ebp=0
+    mov %esp, %ebp
+    call clear_bss_kern
+
+    call master_early_init
+
+    pop %ebp
+    ret
