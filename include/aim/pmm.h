@@ -30,6 +30,26 @@ struct pages {
 	gfp_t flags;
 };
 
+struct page_allocator {
+	int (*alloc)(struct pages *pages);
+	void (*free)(struct pages *pages);
+	addr_t (*get_free)(void);
+};
+
+struct simple_allocator;	/* avoid including vmm */
+
+int page_allocator_init(void);
+int page_allocator_move(struct simple_allocator *old);
+void set_page_allocator(struct page_allocator *allocator);
+/* The registration above COPIES the struct. */
+
+/* 
+ * This interface may look wierd, but it prevents the page allocator from doing
+ * any kmalloc-like allocation: it either breaks a block or remove a block upon
+ * page allocation.
+ * Returns 0 for success and EOF for failure.
+ */
+
 int alloc_pages(struct pages *pages);
 int alloc_aligned_pages(struct pages *pages, lsize_t align);
 void free_pages(struct pages *pages);
@@ -54,6 +74,9 @@ static inline void pgfree(addr_t paddr)
 	p.flags = 0;
 	free_pages(&p);
 }
+
+/* initialize the page-block structure for remaining free memory */
+void add_memory_pages(void);
 
 #endif /* !__ASSEMBLER__ */
 

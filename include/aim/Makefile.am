@@ -28,5 +28,6 @@ noinst_HEADERS = \
 	io.h \
 	mmu.h \
 	panic.h \
-	pmm.h
+	pmm.h \
+	vmm.h
 

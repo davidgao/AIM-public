@@ -17,22 +17,10 @@
 
 include $(top_srcdir)/env.am
 
-SUBDIRS = \
-	kmmap \
-	pmm \
-	vmm
+noinst_LTLIBRARIES = libvmm.la
+noinst_DATA =
 
-noinst_LTLIBRARIES = \
-	libmm.la
+SRCS = vmm.c
 
-libmm_la_SOURCES = \
-	mmu.c \
-	jump.c\
-	kalloc.c \
-	spinlock.c
-	
-libmm_la_LIBADD = \
-	kmmap/libkmmap.la \
-	pmm/libpmm.la \
-	vmm/libvmm.la
+libvmm_la_SOURCES = $(SRCS)
 
