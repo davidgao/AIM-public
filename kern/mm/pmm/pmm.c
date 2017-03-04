@@ -15,7 +15,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
@@ -29,14 +28,20 @@
 #include <util.h>
 
 /* dummy implementations */
+ /*
 static int __alloc(struct pages *pages) { return EOF; }
 static void __free(struct pages *pages) {}
 static addr_t __get_free(void) { return 0; }
+*/
+
+int bundle_pages_alloc(struct pages *pages);
+void bundle_pages_free(struct pages *pages);
+addr_t bundle_pages_size();
 
 static struct page_allocator __allocator = {
-	.alloc		= __alloc,
-	.free		= __free,
-	.get_free	= __get_free
+	.alloc		= bundle_pages_alloc,
+	.free		= bundle_pages_free,
+	.get_free	= bundle_pages_size
 };
 
 void set_page_allocator(struct page_allocator *allocator)
@@ -106,3 +111,8 @@ addr_t get_free_memory(void)
 	return __allocator.get_free();
 }
 
+void master_later_alloc();
+int page_allocator_move(struct simple_allocator *old) {
+	master_later_alloc();
+	return 0;
+}
