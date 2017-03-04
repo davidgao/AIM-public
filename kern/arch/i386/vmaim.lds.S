@@ -56,7 +56,7 @@ SECTIONS
 		BYTE(0)		/* Force the linker to allocate space
 				   for this section */
 	}
-
+	
 	.data   : 
 	    {*(.data);}
 

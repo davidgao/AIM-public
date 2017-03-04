@@ -26,6 +26,7 @@
 #include "aim/boot.h"
 #include "aim/mmu.h"
 #include "aim/kalloc.h"
+#include "segment.h"
 
 extern uint32_t __bss_start_kern, __bss_end_kern;
 
@@ -45,10 +46,9 @@ void arch_load_gdt() {
     kern_gdt[SEG_KDATA] = SEG(STA_W, 0, 0xffffffff, 0);
     kern_gdt[SEG_UCODE] = SEG(STA_X|STA_R, 0, 0xffffffff, DPL_USER);
     kern_gdt[SEG_UDATA] = SEG(STA_W, 0, 0xffffffff, DPL_USER);
-    //TODO: kern_gdt[SEG_KCPU] = SEG(STA_W, &c->cpu, 8, 0);
-    
+    kern_gdt[SEG_KCPU] = SEG(0,0,0,0);
     // lgdt a memory address
-    __asm__ __volatile__ ("lgdt %0":"=m"(kern_gdt));
+    lgdt((struct segdesc *)kern_gdt, sizeof(kern_gdt));
 }
 
 __attribute__((__aligned__(PGSIZE)))
@@ -66,8 +66,8 @@ void master_early_continue();
 void arch_early_init(void)
 {
 
-    arch_load_gdt();
-    set_cr_mmu();    
+    arch_load_gdt();   
+    set_cr_mmu();
 }
 
 void arch_early_continue() {
