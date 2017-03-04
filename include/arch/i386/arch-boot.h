@@ -24,6 +24,8 @@
 typedef struct elf32hdr		elf_hdr;
 typedef struct elf32_phdr	elf_phdr;
 
+#define ELF_MAGIC 0x464C457FU
+
 #endif /* !__ASSEMBLER__ */
 
 #endif /* !_ARCH_BOOT_H */
