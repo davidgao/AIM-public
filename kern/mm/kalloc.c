@@ -1,7 +1,7 @@
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
-
+/*
 #include "sys/types.h"
 #include "aim/mmu.h"
 #include "aim/spinlock.h"
@@ -79,4 +79,4 @@ kalloc(void)
   if(kmem.use_lock)
     release(&kmem.lock);
   return (addr_t*)r;
-}
+}*/

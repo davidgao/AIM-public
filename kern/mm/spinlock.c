@@ -97,29 +97,3 @@ holding(struct spinlock *lock)
 
 void pushcli() {cli();}
 void popcli() {sti();}
-
-// Pushcli/popcli are like cli/sti except that they are matched:
-// it takes two popcli to undo two pushcli.  Also, if interrupts
-// are off, then pushcli, popcli leaves them off.
-/*
-void
-pushcli(void)
-{
-  int eflags;
-  eflags = readeflags();
-  cli();
-  if(cpu->ncli == 0)
-    cpu->intena = eflags & FL_IF;
-  cpu->ncli += 1;
-}
-void
-popcli(void)
-{
-  if(readeflags()&FL_IF)
-    panic("popcli - interruptible");
-  if(--cpu->ncli < 0)
-    panic("popcli");
-  if(cpu->ncli == 0 && cpu->intena)
-    sti();
-}
-*/
