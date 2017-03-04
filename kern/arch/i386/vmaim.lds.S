@@ -38,18 +38,29 @@ SECTIONS
     __text_start_kern = .;
 	.text   : AT(0x100000) {*(.text);}
 	__text_end_kern = .;
+	.rodata :
+        {*(.rodata);}
 	
-	// . = ALIGN(1024 * 1024 * 4); // ensure seperate pages even in 4M paging
+	.stab : {
+		PROVIDE(__STAB_BEGIN__ = .);
+		*(.stab);
+		PROVIDE(__STAB_END__ = .);
+		BYTE(0)		/* Force the linker to allocate space
+				   for this section */
+	}
+
+	.stabstr : {
+		PROVIDE(__STABSTR_BEGIN__ = .);
+		*(.stabstr);
+		PROVIDE(__STABSTR_END__ = .);
+		BYTE(0)		/* Force the linker to allocate space
+				   for this section */
+	}
+
 	.data   : 
-	    // AT(LOADADDR(.text) + SIZEOF(.text)) 
 	    {*(.data);}
 
-    .rodata :
-        // AT(LOADADDR(.bss) + SIZEOF(.bss)) 
-        {*(.rodata);}
-
 	.bss    : 
-	    // AT(LOADADDR(.data) + SIZEOF(.data))
 	{
         __bss_start_kern = .; 
         *(.bss);
@@ -62,7 +73,11 @@ SECTIONS
         __bss_end_kern = .;
     }
 
+    . = ALIGN(4096);
 	.end = .;
 	PROVIDE(__end = .);
+
+	. += (4096 * 16);
+	PROVIDE(__early_buf_end = .);
 	
 }

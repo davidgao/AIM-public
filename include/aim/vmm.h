@@ -20,7 +20,7 @@
 #define _AIM_VMM_H
 
 #include <aim/gfp.h>
-
+#include <libc/string.h>
 /*
  * Two kinds of memory object allocators (may) exist inside a running kernel.
  * - One or two simple allocators: used in kmalloc()-like routines.
@@ -91,4 +91,3 @@ void cache_trim(struct allocator_cache *cache);
 #endif /* !__ASSEMBLER__ */
 
 #endif /* _AIM_VMM_H */
-

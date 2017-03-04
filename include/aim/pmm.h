@@ -21,6 +21,7 @@
 #define _AIM_PMM_H
 
 #include <aim/gfp.h>
+#include <aim/mmu.h>
 
 #ifndef __ASSEMBLER__
 
@@ -29,6 +30,14 @@ struct pages {
 	lsize_t size;
 	gfp_t flags;
 };
+
+// Free page pool
+struct page_node {
+    addr_t paddr;
+    struct page_node *pre;
+    struct page_node *next;
+};
+
 
 struct page_allocator {
 	int (*alloc)(struct pages *pages);
@@ -81,4 +90,3 @@ void add_memory_pages(void);
 #endif /* !__ASSEMBLER__ */
 
 #endif /* _AIM_PMM_H */
-
