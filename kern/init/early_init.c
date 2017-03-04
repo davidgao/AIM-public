@@ -27,10 +27,12 @@
 #include <aim/init.h>
 #include <aim/mmu.h>
 #include <aim/panic.h>
+#include <aim/kalloc.h>
+#include <aim/pmm.h>
+#include <aim/vmm.h>
 #include <drivers/io/io-mem.h>
 #include <drivers/io/io-port.h>
 #include <platform.h>
-#include "aim/kalloc.h"
 
 void set_cr_mmu();
 
@@ -49,6 +51,35 @@ int early_devices_init(void)
 	return 0;
 }
 
+typedef struct address_range_descriptor {
+	uint64_t base;
+	uint64_t length;
+	uint64_t type;
+} ARD;
+
+#define ARD_ENTRY_ADDR 0x9000
+#define ARD_COUNT_ADDR 0x8990
+#define ARD_ENTRY_TARGET 3
+
+static uint64_t __addr_base, __addr_length;
+
+void get_mem_config() {
+	// uint32_t n = (*(void **)ARD_COUNT_ADDR - (void *)ARD_ENTRY_ADDR) / sizeof(ARD);
+	ARD *entry = (ARD *)ARD_ENTRY_ADDR;
+	kprintf("Selected address range descriptor is :\n");
+	kprintf("\t[%x%x, +%x%x], %x\n", 
+		(uint32_t)entry[ARD_ENTRY_TARGET].base & 0xffffffff,
+		(uint32_t)(entry[ARD_ENTRY_TARGET].base >> 32),
+		(uint32_t)entry[ARD_ENTRY_TARGET].length & 0xffffffff,
+		(uint32_t)(entry[ARD_ENTRY_TARGET].length >> 32), 
+		(uint32_t)entry[ARD_ENTRY_TARGET].type
+	);
+	*(uint64_t *)((void *)&__addr_base) // - KERN_BASE) 
+		= entry[ARD_ENTRY_TARGET].base;
+	*(uint64_t *)((void *)&__addr_length) // - KERN_BASE) 
+		= entry[ARD_ENTRY_TARGET].length;
+}
+
 __noreturn
 void master_early_init(void)
 {
@@ -59,8 +90,6 @@ void master_early_init(void)
 	if (early_devices_init() < 0)
 		goto panic;
 	/* other preperations, including early secondary buses */
-	arch_early_init();
-	set_cr_mmu();
 	if (early_console_init(
 		EARLY_CONSOLE_BUS,
 		EARLY_CONSOLE_BASE,
@@ -68,19 +97,66 @@ void master_early_init(void)
 	) < 0)
 		panic("Early console init failed.\n");
 	kputs("Hello, world!\n");
+	
+	get_mem_config();
+	arch_early_init();
 
 	goto panic;
 
 panic:
-	while (1);
+    sleep1();
+    inf_loop();
+}
+
+void master_early_simple_alloc(void *start, void *end);
+void get_early_end();
+void page_alloc_init(addr_t start, addr_t end);
+void master_later_alloc();
+
+extern addr_t *__early_buf_end;
+void master_early_simple_alloc(void *start, void *end);
+int page_allocator_init() {
+	addr_t p_start = premap_addr(&__early_buf_end);
+    if(__addr_base > p_start)
+    	p_start = __addr_base;
+    addr_t p_end = premap_addr(KERN_BASE + PHYSTOP);
+    if(__addr_length + __addr_base < p_end)
+    	p_end = __addr_length + __addr_base;
+    page_alloc_init(p_start, p_end);
+    kprintf("2. page allocator using [0x%p, 0x%p)\n", 
+    	(void *)(uint32_t)p_start, (void *)(uint32_t)p_end
+    );
+    kprintf("\twith free space 0x%llx\n", get_free_memory());
+    return 0;
+}
+
+void master_early_continue() {
+    master_early_simple_alloc(
+    	(void *)premap_addr((uint32_t)&__end), 
+    	(void *)premap_addr(&__early_buf_end)
+    );
+    kprintf("1. early simple allocator using [0x%p, 0x%p)\n", 
+    	(void *)premap_addr((uint32_t)&__end),
+    	(void *)premap_addr(&__early_buf_end)
+    );
+
+	page_allocator_init();
+
+    kprintf("3. later simple allocator depends on page allocator\n");
+    master_later_alloc();
+
+    addr_t temp_addr;
+    temp_addr = pgalloc();
+    kprintf("Test: alloc page 0x%p and is not freed\n", temp_addr);
+    temp_addr = pgalloc();
+    pgfree(temp_addr);
+    kprintf("Test: alloc page 0x%p and is freed\n", temp_addr);
+    
+    panic("Test done!");
+
+    sleep1();
 }
 
 void inf_loop() {
     while(1);
-}
-
-void continue_early_init(void) {
-    early_mm_init();
-    
-    inf_loop();
 }
