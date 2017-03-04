@@ -1,21 +1,3 @@
-/* Copyright (C) 2016 David Gao <davidgao1001@gmail.com>
- *
- * This file is part of AIM.
- *
- * AIM is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * AIM is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #ifndef _ARCH_MMU_H
 #define _ARCH_MMU_H
 
@@ -97,16 +79,6 @@ typedef union page_directory_entry {
 
 #define CR4_PSE         0x00000010      // Page size extension
 
-// various segment selectors.
-#define SEG_KCODE 1  // kernel code
-#define SEG_KDATA 2  // kernel data+stack
-#define SEG_KCPU  3  // kernel per-cpu data
-#define SEG_UCODE 4  // user code
-#define SEG_UDATA 5  // user data+stack
-#define SEG_TSS   6  // this process's task state
-
-// cpu->gdt[NSEGS] holds the above segments.
-#define NSEGS     7
 
 //PAGEBREAK!
 
@@ -247,7 +219,6 @@ struct taskstate {
   ushort iomb;       // I/O map base address
 };
 
-// PAGEBREAK: 12
 // Gate descriptors for interrupts and traps
 struct gatedesc {
   uint off_15_0 : 16;   // low 16 bits of offset in segment

@@ -37,9 +37,9 @@ void early_mm_init(void) {
         (void *)KERN_BASE, PHYSTOP);
     page_index_early_map(entrypgdir, (addr_t)0, 
         (void *)0, PHYSTOP);
-
+    page_index_early_map(entrypgdir, (addr_t)PHYSTOP, 
+        (void *)0xfe000000, 0x1000000);
 }
-
 
 // check validity of PDE
 bool early_mapping_valid(struct early_mapping *entry)
@@ -59,7 +59,7 @@ void mmu_init(pgindex_t *boot_page_index)
 }
 
 void page_index_clear(pgindex_t *boot_page_index) {
-    memset(boot_page_index, JUNKBYTE, PGSIZE);  //TODO: hlt?
+    memset(boot_page_index, JUNKBYTE, PGSIZE); 
 }
 
 // Get or alloc a page table in given pagedir 
@@ -173,7 +173,6 @@ int switch_pgindex(pgindex_t *pgindex) {
 }
 /* Get the currently loaded page index structure */
 pgindex_t *get_pgindex(void){
-    //TODO: implement
     pgindex_t *ret;
     __asm__ __volatile__ (
         "mov %%cr3, %0;"
