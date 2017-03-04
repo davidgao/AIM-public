@@ -166,3 +166,24 @@ void cache_trim(struct allocator_cache *cache)
 	//spin_unlock_irq_restore(&cache->lock, flags);
 }
 
+
+extern addr_t *__early_buf_end;
+void master_early_simple_alloc(void *start, void *end);
+int simple_allocator_bootstrap(void *pt, size_t size) {
+	// Don't do this again!
+	master_early_simple_alloc(
+		(void *)premap_addr((uint32_t)pt), 
+		(void *)premap_addr((uint32_t)pt + size)
+	);
+	return 0;
+}
+
+
+int simple_allocator_init(void) {
+	// Don't do this again!
+	master_early_simple_alloc(
+		(void *)premap_addr((uint32_t)&__end), 
+		(void *)premap_addr(&__early_buf_end)
+	);
+	return 0;
+}
