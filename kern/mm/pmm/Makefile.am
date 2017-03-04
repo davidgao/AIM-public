@@ -19,7 +19,8 @@ include $(top_srcdir)/env.am
 
 noinst_LTLIBRARIES = libpmm.la
 
-SRCS = pmm.c
+SRCS = pmm.c \
+       page_allocator.c
 
 libpmm_la_SOURCES = $(SRCS)
 
