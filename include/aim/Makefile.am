@@ -29,5 +29,6 @@ noinst_HEADERS = \
 	mmu.h \
 	panic.h \
 	pmm.h \
+	trap.h \
 	vmm.h
 

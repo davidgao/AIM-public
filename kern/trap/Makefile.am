@@ -17,10 +17,9 @@
 
 include $(top_srcdir)/env.am
 
-noinst_HEADERS = \
-	arch-boot.h \
-	arch-io.h \
-	arch-mmu.h \
-	arch-trap.h \
-	platform.h
+noinst_LTLIBRARIES = \
+	libtrap.la
+
+libtrap_la_SOURCES = \
+	trap.c
 
