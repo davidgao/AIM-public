@@ -7,11 +7,13 @@
 #include <arch-mmu.h>
 
 void lapicstartap(uchar apicid, uint addr);
-void lapic_init(void);
+void lapic_init();
 void idt_init();
 int cpunum(void);
 void mpinit(void);
 void seginit();
+void picinit();
+void ioapic_init();
 
 void master_early_simple_alloc(void *start, void *end);
 void get_early_end();
