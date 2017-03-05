@@ -10,6 +10,8 @@ void lapicstartap(uchar apicid, uint addr);
 void lapic_init(void);
 void idt_init();
 int cpunum(void);
+void mpinit(void);
+void seginit();
 
 void master_early_simple_alloc(void *start, void *end);
 void get_early_end();

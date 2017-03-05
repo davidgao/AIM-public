@@ -35,6 +35,11 @@ extern int ncpu;
 // extern struct cpu *cpu asm("%gs:0");       // &cpus[cpunum()]
 // extern struct proc *proc asm("%gs:4");     // cpus[cpunum()].proc
 
+void set_gs_cpu(struct cpu *temp);
+struct cpu *get_gs_cpu();
+void set_gs_proc(struct proc *temp);
+struct proc *get_gs_proc();
+
 //PAGEBREAK: 17
 // Saved registers for kernel context switches.
 // Don't need to save all the segment registers (%cs, etc),

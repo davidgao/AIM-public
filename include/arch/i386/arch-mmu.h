@@ -8,6 +8,8 @@
 /* kernel virtual address and physical address conversion */
 #define kva2pa(kva)		(ULCAST(kva) - KERN_BASE)
 #define pa2kva(pa)		(PTRCAST(pa) + KERN_BASE)
+#define P2V(x) pa2kva(x)
+#define V2P(x) kva2pa(x)
 
 #ifndef __ASSEMBLER__
 
