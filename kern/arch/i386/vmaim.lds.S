@@ -21,6 +21,8 @@
 #include <config.h>
 #endif /* HAVE_CONFIG_H */
 
+#include <asm-generic/vmaim.lds.h>
+
 #define __LDSCRIPT__
 
 /*
@@ -36,7 +38,9 @@ SECTIONS
 
 	. = KERN_BASE + 0x100000;
     __text_start_kern = .;
-	.text   : AT(0x100000) {*(.text);}
+	.text   : AT(0x100000) {
+		*(.text);
+	}
 	__text_end_kern = .;
 	.rodata :
         {*(.rodata);}
@@ -71,6 +75,12 @@ SECTIONS
         // Note: config defines KSTACKSIZE as 32768(0x8000)
         PROVIDE(__kstack_top = .);
         __bss_end_kern = .;
+    }
+
+    .init : {
+    	EARLY_INIT(8);
+    	NORM_INIT(8);
+    	LATE_INIT(8);
     }
 
     . = ALIGN(4096);

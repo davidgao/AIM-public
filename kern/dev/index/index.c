@@ -26,6 +26,8 @@
 
 #include <sys/types.h>
 #include <aim/device.h>
+#include <aim/initcalls.h>
+#include <aim/console.h>
 
 #include <libc/string.h>
 
@@ -80,3 +82,44 @@ struct device *dev_from_name(char *name)
 	return __index.from_name(name);
 }
 
+
+extern uint32_t early_init_start;
+extern uint32_t early_init_end;
+int do_early_initcalls() {
+	initcall_t *p = (initcall_t *)(void *)&early_init_start;
+	initcall_t *end = (initcall_t *)(void *)&early_init_end;
+	for(; p<end; p++) {
+		(*p)();
+	}
+}
+
+extern uint32_t norm_init_start;
+extern uint32_t norm_init_end;
+int do_initcalls() {
+	initcall_t *start = (initcall_t *)(void *)&norm_init_start;
+	initcall_t *end = (initcall_t *)(void *)&norm_init_end;
+	for(; start<end; start++) {
+		(*start)();
+	}
+}
+
+void register_driver(unsigned int major, struct driver *drv) {
+	kpdebug("register_driver: driver at %p\n", drv);
+	return;
+}
+void initdev(struct device *dev, int class, const char *devname, dev_t devno,
+    	struct driver *drv) {
+	dev->class = class;
+	memcpy(dev->name, devname, DEV_NAME_MAX);
+	dev->devno = devno;
+	if(drv->class == DEVCLASS_BUS) {
+		dev->bus_driver = *(struct bus_driver *)drv;
+	}
+	else if(drv->class == DEVCLASS_CHR) {
+		dev->chr_driver = *(struct chr_driver *)drv;
+	}
+	else
+		dev->driver = *drv;
+	kpdebug("initdev: %s\n", devname);
+	return;
+}

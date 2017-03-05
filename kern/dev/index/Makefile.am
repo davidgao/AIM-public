@@ -17,8 +17,17 @@
 
 include $(top_srcdir)/env.am
 
-noinst_LTLIBRARIES = libindex.la
+noinst_LTLIBRARIES = libindex.la 
 noinst_PROGRAMS =
+
+noinst_LTLIBRARIES += libdevlist-raw.la
+MODULE_SRCS = devlist.c
+libdevlist_raw_la_SOURCES = devlist.c
+libdevlist_raw_la_CPPFLAGS = $(AM_CPPFLAGS_NOPIC)
+libdevlist_raw_la_CFLAGS = $(AM_CFLAGS_NOPIC)
+libdevlist_raw_la_CCASFLAGS = $(AM_CCASFLAGS_NOPIC)
+libdevlist_raw_la_LDFLAGS = $(AM_LDFLAGS_NOPIC)
+
 
 if ALGO_DEVLIST
 noinst_PROGRAMS += devlist.ko
