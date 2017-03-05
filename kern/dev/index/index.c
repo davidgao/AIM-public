@@ -91,6 +91,7 @@ int do_early_initcalls() {
 	for(; p<end; p++) {
 		(*p)();
 	}
+	return 0;
 }
 
 extern uint32_t norm_init_start;
@@ -101,6 +102,7 @@ int do_initcalls() {
 	for(; start<end; start++) {
 		(*start)();
 	}
+	return 0;
 }
 
 void register_driver(unsigned int major, struct driver *drv) {

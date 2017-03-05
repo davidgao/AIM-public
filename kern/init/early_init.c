@@ -35,7 +35,9 @@
 #include <drivers/io/io-port.h>
 #include <platform.h>
 #include <arch-init.h>
+#include <arch-sync.h>
 #include <mutex.h>
+#include <asm.h>
 
 void set_cr_mmu();
 
@@ -144,30 +146,36 @@ void master_early_continue() {
     kprintf("3. later simple allocator depends on page allocator\n");
     master_later_alloc();
 
-    trap_init();
-
-    do_initcalls();
-
+    
     mpinit();
+    lapic_init();
     seginit();
+    picinit();
+    ioapic_init();
+    do_initcalls();
+    trap_init();
+    
     startothers();
 
     kputs("Successfully start other processors\n");
 
-    struct mutex m = MUTEX_INITIALIZER;
-    acquire(&m);
-    release(&m);
+    void panic_other_cpus();
+
+
+    lock_t l = LOCK_INITIALIZER;
+    spin_lock(&l);
+    spin_unlock(&l);
 
     kputs("Successfully test mutex\n");
 
-    struct semaphore s = SEM_INITIALIZER(1);
-
-    single_semdown(&s);
-    semup(&s);
+    semaphore_t s = SEM_INITIALIZER(2);
+    semaphore_dec(&s);
+    semaphore_inc(&s);
 
     kputs("Successfully test semaphore\n");
 
-    sleep1();
+    panic("Done with tests\n");
+
 }
 
 void inf_loop() {

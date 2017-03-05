@@ -11,7 +11,6 @@
 #include <arch-trap.h>
 #include <proc.h>
 
-#define LAPIC_ADDR 0xFEE00000
 
 // Local APIC registers, divided by 4 for use as uint[] indices.
 #define ID      (0x0020/4)   // ID
@@ -55,9 +54,8 @@ lapicw(int index, int value)
 //PAGEBREAK!
 
 void
-lapic_init(void)
+lapic_init()
 {
-  lapic = (uint *)LAPIC_ADDR;
   if(!lapic)
     return;
 
@@ -101,8 +99,6 @@ lapic_init(void)
   lapicw(TPR, 0);
 }
 
-////////////////////////////
-
 int
 cpunum(void)
 {
@@ -115,11 +111,9 @@ cpunum(void)
   // often indirectly through acquire and release.
   if(readeflags()&FL_IF){
     static int n;
-    if(n++ == 0) {
-      //cprintf("cpu called from %x with interrupts enabled\n",
+    if(n++ == 0)
       kprintf("cpu called from %x with interrupts enabled\n",
         __builtin_return_address(0));
-    }
   }
 
   if (!lapic)
@@ -140,7 +134,6 @@ lapiceoi(void)
   if(lapic)
     lapicw(EOI, 0);
 }
-
 
 // Spin for a given number of microseconds.
 // On real hardware would want to tune this dynamically.
@@ -165,8 +158,7 @@ lapicstartap(uchar apicid, uint addr)
   // the AP startup code prior to the [universal startup algorithm]."
   outb(CMOS_PORT, 0xF);  // offset 0xF is shutdown code
   outb(CMOS_PORT+1, 0x0A);
-  // TODO: wrv = (ushort*)P2V((0x40<<4 | 0x67));  // Warm reset vector
-  wrv = (ushort*)pa2kva((0x40<<4 | 0x67));  // Warm reset vector
+  wrv = (ushort*)P2V((0x40<<4 | 0x67));  // Warm reset vector
   wrv[0] = 0;
   wrv[1] = addr >> 4;
 
@@ -189,3 +181,19 @@ lapicstartap(uchar apicid, uint addr)
     microdelay(200);
   }
 }
+
+void panic_other_cpus() {
+  lapicw(ICRHI, 0);
+  lapicw(ICRLO, 0x79 | BCAST | LEVEL);
+}
+
+#define CMOS_STATA   0x0a
+#define CMOS_STATB   0x0b
+#define CMOS_UIP    (1 << 7)        // RTC update in progress
+
+#define SECS    0x00
+#define MINS    0x02
+#define HOURS   0x04
+#define DAY     0x07
+#define MONTH   0x08
+#define YEAR    0x09

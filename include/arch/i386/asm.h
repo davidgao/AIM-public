@@ -208,6 +208,19 @@ xchg(volatile uint *addr, uint newval)
 }
 
 static inline uint
+cmpxchg(volatile uint *addr, uint oldval, uint newval)
+{
+  uint result;
+  asm volatile(
+    "lock; cmpxchgl %2, %1" 
+    :"=a"(result), "+m"(*addr)
+    :"r"(newval),"0"(oldval) 
+    :"memory"
+  );
+  return result;
+}
+
+static inline uint
 rcr2(void)
 {
   uint val;

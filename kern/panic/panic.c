@@ -43,8 +43,9 @@ void __local_panic(void)
 	 * Later on there will be interfaces for the targets and drivers.
 	 * We currently do a tight loop.
 	 */
-
-	for (;;)
+	 while(1)
+	 	asm("hlt");
+	//for (;;)
 		/* nothing */;
 }
 
@@ -66,7 +67,7 @@ void panic(const char *fmt, ...)
 
 	//local_irq_disable();
 
-	//panic_other_cpus();
+	panic_other_cpus();
 
 	va_start(args, fmt);
 	result = vsnprintf(__buf, BUFSIZ, fmt, args);
@@ -81,3 +82,25 @@ void panic(const char *fmt, ...)
 	__local_panic();
 }
 
+__noreturn
+void local_panic(const char *fmt, ...) {
+	static char __buf[BUFSIZ];
+	va_list args;
+	int result;
+
+	//local_irq_disable();
+
+	//panic_other_cpus();
+
+	va_start(args, fmt);
+	result = vsnprintf(__buf, BUFSIZ, fmt, args);
+	va_end(args);
+
+	kputs("----- KERNEL PANIC -----\n");
+	if (result >= BUFSIZ) {
+		kputs("PANIC: message is truncated.");
+	}
+	kputs(__buf);
+	
+	__local_panic();
+}

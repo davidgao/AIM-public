@@ -37,7 +37,7 @@ void early_mm_init(void) {
         (void *)KERN_BASE, PHYSTOP);
     page_index_early_map(entrypgdir, (addr_t)0, 
         (void *)0, PHYSTOP);
-    page_index_early_map(entrypgdir, (addr_t)PHYSTOP, 
+    page_index_early_map(entrypgdir, (addr_t)0xfe000000, 
         (void *)0xfe000000, 0x1000000);
 }
 

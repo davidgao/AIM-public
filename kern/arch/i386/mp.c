@@ -78,7 +78,7 @@ mpsearch(void)
 // Check for correct signature, calculate the checksum and,
 // if correct, check the version.
 // To do: check extended table checksum.
-static struct mpconf*
+static struct mpconf* 
 mpconfig(struct mp **pmp)
 {
   struct mpconf *conf;
@@ -189,12 +189,11 @@ mpmain(void)
 {
   //cprintf("cpu%d: starting\n", cpunum());
   kprintf("cpu%d: starting\n", cpunum());
-  idt_init();       // load idt register
-
-  panic("This cpu is on!");
-
+  trap_init();
   struct cpu *c = get_gs_cpu();
   xchg(&c->started, 1);
+
+  while(1);
 
   //TODO: scheduler();     // start running processes
 }
@@ -230,10 +229,9 @@ startothers(void)
   // Write entry code to unused memory at 0x7000.
   // The linker has placed the image of entryother.S in
   // _binary_entryother_start.
-  code = (uchar *)(0x7000);
+  code = (uchar *)P2V(0x7000);
   
 
-  //memmove(code, _binary_entryother_start, (uint)_binary_entryother_size);
   memmove(code, (void *)entryother_start, (uint)(entryother_end - entryother_start));
 
   for(c = cpus; c < cpus+ncpu; c++){
@@ -247,11 +245,13 @@ startothers(void)
     stack = (char *)(uint32_t)pgalloc();
     *(void**)(code-4) = stack + KSTACKSIZE;	// used as temp stack
     *(void**)(code-8) = mpenter;	// used as callback
-    *(int**)(code-12) = (void *) kva2pa(entrypgdir);
+    *(int**)(code-12) = (void *) V2P(entrypgdir);
     *(struct segdesc **)(code-16) = mp_gdt;
-    lapicstartap(c->apicid, kva2pa(code));
+    
+    *(char *)(0x8000) = 0;
 
-    // wait for cpu to finish mpmain()
+    lapicstartap(c->apicid, V2P(code));
+    
     while(c->started == 0)
       ;
   }
@@ -286,7 +286,7 @@ void set_gs_proc(struct proc *temp) {
 struct proc *get_gs_proc() {
   struct proc *temp;
   __asm__ __volatile__(
-    "mov %%gs:0, %%eax;"
+    "mov %%gs:4, %%eax;"
     "mov %%eax, %0"
     :"=m"(temp)
   );

@@ -9,7 +9,9 @@
 #include <segment.h>
 #include <aim/panic.h>
 #include <aim/trap.h>
+#include <aim/console.h>
 #include <asm.h>
+#include <proc.h>
 
 #define NIDT 256
 
@@ -26,6 +28,7 @@ void idt_init() {
 	SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER);
 }
 
+int cpunum();
 void trap(struct trapframe *tf) {
 	long ans;
 	if(tf->trapno == T_SYSCALL) {
@@ -37,53 +40,101 @@ void trap(struct trapframe *tf) {
 		return;
 	}
 	if(tf->trapno >= T_IRQ0 && tf->trapno < T_IRQ0 + 32) {
-		handle_interrupt(tf->trapno - T_IRQ0);
+    handle_interrupt(tf->trapno - T_IRQ0);
 		return;
 	}
+  if(tf->trapno == 0x79) {
+    panic("CPU %d panic on temporary signal 0x79\n", cpunum());
+  }
+  kprintf("Receive undefined trapno 0x%x\n", tf->trapno);
 	panic("trap: Implement me for others");
+
 }
 
-// init PIC (i8259)
-#define PORT_PIC_MASTER 0x20
-#define PORT_PIC_SLAVE  0xA0
-
-void init_i8259(void) {
-	/* mask all interrupts */
-	outb(PORT_PIC_MASTER + 1, 0xFF);
-	outb(PORT_PIC_SLAVE + 1 , 0xFF);
-	
-	/* start initialization */
-	outb(PORT_PIC_MASTER, 0x11);
-	outb(PORT_PIC_MASTER + 1, 32);
-	outb(PORT_PIC_MASTER + 1, 1 << 2);
-	outb(PORT_PIC_MASTER + 1, 0x3);
-	outb(PORT_PIC_SLAVE, 0x11);
-	outb(PORT_PIC_SLAVE + 1, 32 + 8);
-	outb(PORT_PIC_SLAVE + 1, 2);
-	outb(PORT_PIC_SLAVE + 1, 0x3);
-	outb(PORT_PIC_MASTER, 0x68);
-	outb(PORT_PIC_MASTER, 0x0A);
-	outb(PORT_PIC_SLAVE, 0x68);
-	outb(PORT_PIC_SLAVE, 0x0A);
-}
-
-void lapic_init();
-void ioapic_init();
 
 void trap_init(void) {
 	idt_init();	// prepare int vectors
 
-	// init lapic
-	lapic_init();
-
-	// init ioapic
-	ioapic_init();
-
-	// init PIC (i8259)
-	init_i8259();
-
-	// int not enabled in this function
-	
 	lidt((struct gatedesc *)idt, sizeof(idt));
 
+}
+
+
+// I/O Addresses of the two programmable interrupt controllers
+#define IO_PIC1         0x20    // Master (IRQs 0-7)
+#define IO_PIC2         0xA0    // Slave (IRQs 8-15)
+
+#define IRQ_SLAVE       2       // IRQ at which slave connects to master
+
+// Current IRQ mask.
+// Initial IRQ mask has interrupt 2 enabled (for slave 8259A).
+static ushort irqmask = 0xFFFF & ~(1<<IRQ_SLAVE);
+
+static void
+picsetmask(ushort mask)
+{
+  irqmask = mask;
+  outb(IO_PIC1+1, mask);
+  outb(IO_PIC2+1, mask >> 8);
+}
+
+void
+picenable(int irq)
+{
+  picsetmask(irqmask & ~(1<<irq));
+}
+
+// Initialize the 8259A interrupt controllers.
+void
+picinit(void)
+{
+  // mask all interrupts
+  outb(IO_PIC1+1, 0xFF);
+  outb(IO_PIC2+1, 0xFF);
+
+  // Set up master (8259A-1)
+
+  // ICW1:  0001g0hi
+  //    g:  0 = edge triggering, 1 = level triggering
+  //    h:  0 = cascaded PICs, 1 = master only
+  //    i:  0 = no ICW4, 1 = ICW4 required
+  outb(IO_PIC1, 0x11);
+
+  // ICW2:  Vector offset
+  outb(IO_PIC1+1, T_IRQ0);
+
+  // ICW3:  (master PIC) bit mask of IR lines connected to slaves
+  //        (slave PIC) 3-bit # of slave's connection to master
+  outb(IO_PIC1+1, 1<<IRQ_SLAVE);
+
+  // ICW4:  000nbmap
+  //    n:  1 = special fully nested mode
+  //    b:  1 = buffered mode
+  //    m:  0 = slave PIC, 1 = master PIC
+  //      (ignored when b is 0, as the master/slave role
+  //      can be hardwired).
+  //    a:  1 = Automatic EOI mode
+  //    p:  0 = MCS-80/85 mode, 1 = intel x86 mode
+  outb(IO_PIC1+1, 0x3);
+
+  // Set up slave (8259A-2)
+  outb(IO_PIC2, 0x11);                  // ICW1
+  outb(IO_PIC2+1, T_IRQ0 + 8);      // ICW2
+  outb(IO_PIC2+1, IRQ_SLAVE);           // ICW3
+  // NB Automatic EOI mode doesn't tend to work on the slave.
+  // Linux source code says it's "to be investigated".
+  outb(IO_PIC2+1, 0x3);                 // ICW4
+
+  // OCW3:  0ef01prs
+  //   ef:  0x = NOP, 10 = clear specific mask, 11 = set specific mask
+  //    p:  0 = no polling, 1 = polling mode
+  //   rs:  0x = NOP, 10 = read IRR, 11 = read ISR
+  outb(IO_PIC1, 0x68);             // clear specific mask
+  outb(IO_PIC1, 0x0a);             // read IRR by default
+
+  outb(IO_PIC2, 0x68);             // OCW3
+  outb(IO_PIC2, 0x0a);             // OCW3
+
+  if(irqmask != 0xFFFF)
+    picsetmask(irqmask);
 }

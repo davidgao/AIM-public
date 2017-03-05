@@ -21,11 +21,15 @@
 
 #ifndef __ASSEMBLER__
 
-extern uint8_t mbr[];
+extern uint8_t *mbr;
 
 #endif /* !__ASSEMBLER__ */
 
 #include <arch-boot.h>
+
+#ifndef SECT_SIZE
+#define SECT_SIZE	512
+#endif /* !SECT_SIZE */
 
 #endif /* !_AIM_BOOT_H */
 

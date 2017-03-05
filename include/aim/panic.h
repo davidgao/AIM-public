@@ -30,6 +30,7 @@ void __local_panic(void);
 
 __noreturn
 void panic(const char *fmt, ...);
+void local_panic(const char *fmt, ...);
 
 /* Arch/mach-dependent code */
 void panic_other_cpus(void);

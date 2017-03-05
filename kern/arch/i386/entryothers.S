@@ -11,7 +11,7 @@
 .code16           
 .globl entryother_start
 entryother_start:
-  cli            
+  cli   
 
   # Zero data segment registers DS, ES, and SS.
   xorw    %ax,%ax
@@ -22,9 +22,8 @@ entryother_start:
   # Switch from real to protected mode.  Use a bootstrap GDT that makes
   # virtual addresses map directly to physical addresses so that the
   # effective memory map doesn't change during the transition.
-  // lgdt    entryother_gdtdesc  // cannot do this when linked with .32 code
-  mov     $(ENT_OTHER_CODE_START - 16), %eax
-  lgdt    (%eax)
+  lgdt    (ENT_OTHER_CODE_START + entryother_gdtdesc - entryother_start)  
+ 
   movl    %cr0, %eax
   orl     $CR0_PE, %eax
   movl    %eax, %cr0
@@ -38,6 +37,7 @@ entryother_start:
 .code32  # Tell assembler to generate 32-bit code now.
 entrystart32:
   # Set up the protected-mode data segment registers
+
   movw    $(SEG_KDATA<<3), %ax    # Our data segment selector
   movw    %ax, %ds                # -> DS: Data Segment
   movw    %ax, %es                # -> ES: Extra Segment
@@ -61,6 +61,7 @@ entrystart32:
   # Switch to the stack allocated by startothers()
   movl    (ENT_OTHER_CODE_START-4), %esp
   # Call mpenter()
+
   call	 *(ENT_OTHER_CODE_START-8)
 
   movw    $0x8a00, %ax
@@ -71,6 +72,19 @@ entrystart32:
 spin:
   jmp     spin
 
+
+.p2align 2
+entryother_gdt:
+  SEG_NULLASM
+  SEG_ASM(STA_X|STA_R, 0, 0xffffffff)
+  SEG_ASM(STA_W, 0, 0xffffffff)
+
+
+entryother_gdtdesc:
+  .word   (entryother_gdtdesc - entryother_gdt - 1)
+  .long   ENT_OTHER_CODE_START + entryother_gdt - entryother_start
+
 .globl entryother_end
 entryother_end:
   jmp entryother_end
+  
