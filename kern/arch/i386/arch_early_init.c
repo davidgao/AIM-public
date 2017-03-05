@@ -28,6 +28,7 @@
 #include "aim/kalloc.h"
 #include "asm.h"
 #include "segment.h"
+#include "arch-init.h"
 
 extern uint32_t __bss_start_kern, __bss_end_kern;
 

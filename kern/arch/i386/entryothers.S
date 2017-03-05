@@ -32,7 +32,7 @@ entryother_start:
   # Complete the transition to 32-bit protected mode by using a long jmp
   # to reload %cs and %eip.  The segment descriptors are set up with no
   # translation, so that the mapping is still the identity mapping.
-  ljmpl    $(SEG_KCODE<<3), $(entrystart32)
+  ljmpl    $(SEG_KCODE<<3), $(ENT_OTHER_CODE_START + entrystart32 - entryother_start)
 
 //PAGEBREAK!
 .code32  # Tell assembler to generate 32-bit code now.

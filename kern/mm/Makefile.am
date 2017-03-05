@@ -27,8 +27,7 @@ noinst_LTLIBRARIES = \
 
 libmm_la_SOURCES = \
 	mmu.c \
-	jump.c\
-	kalloc.c \
+	jump.c \
 	spinlock.c
 	
 libmm_la_LIBADD = \
@@ -36,3 +35,4 @@ libmm_la_LIBADD = \
 	pmm/libpmm.la \
 	vmm/libvmm.la
 
+	

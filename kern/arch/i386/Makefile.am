@@ -40,8 +40,9 @@ libarch_la_SOURCES = \
 	lapic.c \
 	ioapic.c \
 	arch_libc.c \
-	mp.c
-	
+	mp.c \
+	mutex.c
+
 libarch_la_LIBADD = \
 	mach-$(MACH)/libmach.la
-
+	
