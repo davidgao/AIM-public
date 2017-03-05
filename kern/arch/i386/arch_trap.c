@@ -24,25 +24,23 @@ void idt_init() {
 		SETGATE(idt[i], 0, SEG_KCODE<<3, vectors[i], 0);
 	}
 	SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER);
-
-	// initlock(&ticklock, "time");
 }
 
 void trap(struct trapframe *tf) {
 	long ans;
-	switch(tf->trapno) {
-		case T_SYSCALL:
-			ans = handle_syscall(
-				tf->eax, tf->ebx, tf->ecx, tf->edx,
-				tf->esi, tf->edi, tf->ebp
-			);
-			tf->eax = ans;
-			break;
-		default:
-			handle_interrupt(tf->trapno);
-			break;
+	if(tf->trapno == T_SYSCALL) {
+		ans = handle_syscall(
+			tf->eax, tf->ebx, tf->ecx, tf->edx,
+			tf->esi, tf->edi, tf->ebp
+		);
+		tf->eax = ans;
+		return;
 	}
-
+	if(tf->trapno >= T_IRQ0 && tf->trapno < T_IRQ0 + 32) {
+		handle_interrupt(tf->trapno - T_IRQ0);
+		return;
+	}
+	panic("trap: Implement me for others");
 }
 
 // init PIC (i8259)

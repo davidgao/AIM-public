@@ -48,17 +48,12 @@ ioapicwrite(int reg, uint data)
 void
 ioapic_init(void)
 {
-  int i, id, maxintr;
+  int i, maxintr;
 
-  //TODO: if(!ismp)
-  //  return;
 
   ioapic = (volatile struct ioapic*)IOAPIC;
   maxintr = (ioapicread(REG_VER) >> 16) & 0xFF;
-  id = ioapicread(REG_ID) >> 24;
-  //TODO: if(id != ioapicid)
-  //  cprintf("ioapicinit: id isn't equal to ioapicid; not a MP\n");
-
+  
   // Mark all interrupts edge-triggered, active high, disabled,
   // and not routed to any CPUs.
   for(i = 0; i <= maxintr; i++){
