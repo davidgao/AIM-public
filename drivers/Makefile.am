@@ -19,6 +19,7 @@
 include $(top_srcdir)/env.am
 
 SUBDIRS = \
+	common \
 	io \
 	serial
 
@@ -35,6 +36,7 @@ libdrivers_raw_la_LDFLAGS = $(AM_LDFLAGS_NOPIC)
 
 libdrivers_la_SOURCES =
 libdrivers_la_LIBADD = \
+	common/libcommon.la \
 	io/libio.la \
 	serial/libserial.la
 

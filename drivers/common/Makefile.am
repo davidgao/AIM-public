@@ -1,4 +1,4 @@
-# Copyright (C) 2016 David Gao <davidgao1001@gmail.com>
+# Copyright (C) 2016 Gan Quan <coin2028@hotmail.com>
 #
 # This file is part of AIM.
 #
@@ -17,10 +17,7 @@
 
 include $(top_srcdir)/env.am
 
-SUBDIRS = index
+noinst_LTLIBRARIES = libcommon.la
 
-noinst_LTLIBRARIES = libdev.la
-
-libdev_la_SOURCES = console.c
-libdev_la_LIBADD = index/libindex.la
+libcommon_la_SOURCES = core.c
 

@@ -17,10 +17,14 @@
 
 include $(top_srcdir)/env.am
 
-SUBDIRS = index
+noinst_LTLIBRARIES = libindex.la
+noinst_PROGRAMS =
 
-noinst_LTLIBRARIES = libdev.la
+if ALGO_DEVLIST
+noinst_PROGRAMS += devlist.ko
+devlist_ko_SOURCES = devlist.c
+devlist_ko_LDFLAGS = $(AM_LDFLAGS) -Wl,-r
+endif
 
-libdev_la_SOURCES = console.c
-libdev_la_LIBADD = index/libindex.la
+libindex_la_SOURCES = index.c
 

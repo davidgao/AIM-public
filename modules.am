@@ -18,11 +18,19 @@
 
 MODULES =
 
+##############
+# Algorithms #
+##############
+
+if ALGO_DEVLIST
+MODULES += $(top_builddir)/kern/dev/index/devlist.ko
+endif
+
 ################
 # UART serials #
 ################
 
 if UART_NS16550
-MODULES += $(top_builddir)/drivers/serial/uart-ns16550.o
+MODULES += $(top_builddir)/drivers/serial/uart-ns16550.ko
 endif
 

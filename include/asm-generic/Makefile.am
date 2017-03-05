@@ -17,10 +17,6 @@
 
 include $(top_srcdir)/env.am
 
-SUBDIRS = index
-
-noinst_LTLIBRARIES = libdev.la
-
-libdev_la_SOURCES = console.c
-libdev_la_LIBADD = index/libindex.la
+noinst_HEADERS = \
+	vmaim.lds.h
 

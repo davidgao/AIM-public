@@ -19,7 +19,8 @@ include $(top_srcdir)/env.am
 
 SUBDIRS = \
 	aim \
-	arch
+	arch \
+	asm-generic
 
 nobase_noinst_HEADERS = \
 	sys/param.h \

@@ -25,6 +25,7 @@ noinst_HEADERS = \
 	early_kmmap.h \
 	gfp.h \
 	init.h \
+	initcalls.h \
 	io.h \
 	mmu.h \
 	panic.h \

@@ -22,11 +22,11 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <libc/string.h>
 //#include <aim/sync.h>
 #include <aim/vmm.h>
 #include <aim/mmu.h>	/* PAGE_SIZE */
 #include <aim/panic.h>
-#include <libc/string.h>
 
 /* dummy implementations */
 static void *__simple_alloc(size_t size, gfp_t flags) { return NULL; }
