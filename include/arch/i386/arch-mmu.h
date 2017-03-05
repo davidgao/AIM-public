@@ -14,6 +14,7 @@
 #define PHYSTOP 0xE000000   
 
 #include "sys/types.h"
+#include "util.h"
 
 // same thing with four names
 typedef uint32_t	pde_t;

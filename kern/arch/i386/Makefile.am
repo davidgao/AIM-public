@@ -30,14 +30,18 @@ noinst_LTLIBRARIES = \
 
 libentry_la_SOURCES = \
 	entry.S \
-	set_mmu.S
+	set_mmu.S \
+	entryothers.S
 
 libarch_la_SOURCES = \
 	arch_early_init.c \
 	arch_mmu.c \
 	arch_trap.c \
 	lapic.c \
-	ioapic.c
+	ioapic.c \
+	arch_libc.c \
+	mp.c
+	
 libarch_la_LIBADD = \
 	mach-$(MACH)/libmach.la
 

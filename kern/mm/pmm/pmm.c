@@ -51,7 +51,7 @@ void set_page_allocator(struct page_allocator *allocator)
 
 void pmemset(addr_t paddr, unsigned char b, lsize_t size)
 {
-	for (; size > 0; size -= PAGE_SIZE, paddr += PAGE_SIZE)
+	for (;((int64_t)size) > 0; size -= PAGE_SIZE, paddr += PAGE_SIZE)
 		memset((void *)pa2kva(paddr), b, PAGE_SIZE);
 }
 

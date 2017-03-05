@@ -26,6 +26,7 @@
 #include "aim/boot.h"
 #include "aim/mmu.h"
 #include "aim/kalloc.h"
+#include "asm.h"
 #include "segment.h"
 
 extern uint32_t __bss_start_kern, __bss_end_kern;
@@ -66,8 +67,8 @@ void master_early_continue();
 void arch_early_init(void)
 {
 
-    arch_load_gdt();   
-    set_cr_mmu();
+    arch_load_gdt();
+    set_cr_mmu();    
 }
 
 void arch_early_continue() {

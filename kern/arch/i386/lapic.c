@@ -4,7 +4,12 @@
 
 #include <sys/types.h>
 #include <sys/param.h>
+#include <aim/console.h>
+#include <aim/pmm.h>
+#include <asm.h>
+#include <arch-mmu.h>
 #include <arch-trap.h>
+#include <proc.h>
 
 #define LAPIC_ADDR 0xFEE00000
 
@@ -94,4 +99,93 @@ lapic_init(void)
 
   // Enable interrupts on the APIC (but not on the processor).
   lapicw(TPR, 0);
+}
+
+////////////////////////////
+
+int
+cpunum(void)
+{
+  int apicid, i;
+  
+  // Cannot call cpu when interrupts are enabled:
+  // result not guaranteed to last long enough to be used!
+  // Would prefer to panic but even printing is chancy here:
+  // almost everything, including cprintf and panic, calls cpu,
+  // often indirectly through acquire and release.
+  if(readeflags()&FL_IF){
+    static int n;
+    if(n++ == 0) {
+      //cprintf("cpu called from %x with interrupts enabled\n",
+      kprintf("cpu called from %x with interrupts enabled\n",
+        __builtin_return_address(0));
+    }
+  }
+
+  if (!lapic)
+    return 0;
+
+  apicid = lapic[ID] >> 24;
+  for (i = 0; i < ncpu; ++i) {
+    if (cpus[i].apicid == apicid)
+      return i;
+  }
+  panic("unknown apicid\n");
+}
+
+// Acknowledge interrupt.
+void
+lapiceoi(void)
+{
+  if(lapic)
+    lapicw(EOI, 0);
+}
+
+
+// Spin for a given number of microseconds.
+// On real hardware would want to tune this dynamically.
+void
+microdelay(int us)
+{
+}
+
+#define CMOS_PORT    0x70
+#define CMOS_RETURN  0x71
+
+// Start additional processor running entry code at addr.
+// See Appendix B of MultiProcessor Specification.
+void
+lapicstartap(uchar apicid, uint addr)
+{
+  int i;
+  ushort *wrv;
+
+  // "The BSP must initialize CMOS shutdown code to 0AH
+  // and the warm reset vector (DWORD based at 40:67) to point at
+  // the AP startup code prior to the [universal startup algorithm]."
+  outb(CMOS_PORT, 0xF);  // offset 0xF is shutdown code
+  outb(CMOS_PORT+1, 0x0A);
+  // TODO: wrv = (ushort*)P2V((0x40<<4 | 0x67));  // Warm reset vector
+  wrv = (ushort*)pa2kva((0x40<<4 | 0x67));  // Warm reset vector
+  wrv[0] = 0;
+  wrv[1] = addr >> 4;
+
+  // "Universal startup algorithm."
+  // Send INIT (level-triggered) interrupt to reset other CPU.
+  lapicw(ICRHI, apicid<<24);
+  lapicw(ICRLO, INIT | LEVEL | ASSERT);
+  microdelay(200);
+  lapicw(ICRLO, INIT | LEVEL);
+  microdelay(100);    // should be 10ms, but too slow in Bochs!
+
+  // Send startup IPI (twice!) to enter code.
+  // Regular hardware is supposed to only accept a STARTUP
+  // when it is in the halted state due to an INIT.  So the second
+  // should be ignored, but it is part of the official Intel algorithm.
+  // Bochs complains about the second one.  Too bad for Bochs.
+  for(i = 0; i < 2; i++){
+    lapicw(ICRHI, apicid<<24);
+    lapicw(ICRLO, STARTUP | (addr>>12));
+    microdelay(200);
+  }
 }

@@ -100,4 +100,3 @@ void trap(struct trapframe *tf);
 #define IRQ_SPURIOUS    31
 
 #endif /* _ARCH_TRAP_H */
-

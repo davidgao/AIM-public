@@ -26,5 +26,6 @@ noinst_HEADERS = \
 	arch-trap.h \
 	asm.h \
 	cr.h \
- 	segment.h
-	platform.h
+ 	segment.h \
+	platform.h \
+	arch-init.h

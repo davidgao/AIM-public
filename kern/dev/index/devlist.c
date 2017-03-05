@@ -141,14 +141,7 @@ static struct device *__from_id(dev_t devno)
 	return retval;
 }
 
-int strcmp(const char *a, const char *b) {
-	while(*a == *b && *a!='\0') {
-		a++; b++;
-	}
-	if(*a == *b) return 0;
-	else
-		return *a - *b;
-}
+int strcmp(const char *a, const char *b);
 
 static struct device *__from_name(char *name)
 {

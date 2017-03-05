@@ -34,6 +34,7 @@
 #include <drivers/io/io-mem.h>
 #include <drivers/io/io-port.h>
 #include <platform.h>
+#include <arch-init.h>
 
 void set_cr_mmu();
 
@@ -99,7 +100,7 @@ void master_early_init(void)
 	) < 0)
 		panic("Early console init failed.\n");
 	kputs("Hello, world!\n");
-	
+
 	get_mem_config();
 	arch_early_init();
 
@@ -107,14 +108,8 @@ void master_early_init(void)
 
 panic:
     sleep1();
-	inf_loop();
+    inf_loop();
 }
-
-void master_early_simple_alloc(void *start, void *end);
-void get_early_end();
-void page_alloc_init(addr_t start, addr_t end);
-void master_later_alloc();
-void trap_init();
 
 extern addr_t *__early_buf_end;
 void master_early_simple_alloc(void *start, void *end);
@@ -133,7 +128,6 @@ int page_allocator_init() {
     return 0;
 }
 
-
 void master_early_continue() {
     master_early_simple_alloc(
     	(void *)premap_addr((uint32_t)&__end), 
@@ -149,18 +143,13 @@ void master_early_continue() {
     kprintf("3. later simple allocator depends on page allocator\n");
     master_later_alloc();
 
-    addr_t temp_addr;
-    temp_addr = pgalloc();
-    kprintf("Test: alloc page 0x%p and is not freed\n", temp_addr);
-    temp_addr = pgalloc();
-    pgfree(temp_addr);
-    kprintf("Test: alloc page 0x%p and is freed\n", temp_addr);
-
     trap_init();
 
     do_initcalls();
 
-    panic("Device init done");
+    startothers();
+
+    panic("Other processors on");
 
     sleep1();
 }
