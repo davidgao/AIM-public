@@ -35,6 +35,7 @@
 #include <drivers/io/io-port.h>
 #include <platform.h>
 #include <arch-init.h>
+#include <mutex.h>
 
 void set_cr_mmu();
 
@@ -108,7 +109,7 @@ void master_early_init(void)
 
 panic:
     sleep1();
-    inf_loop();
+	inf_loop();
 }
 
 extern addr_t *__early_buf_end;
@@ -147,9 +148,24 @@ void master_early_continue() {
 
     do_initcalls();
 
+    mpinit();
+    seginit();
     startothers();
 
-    panic("Other processors on");
+    kputs("Successfully start other processors\n");
+
+    struct mutex m = MUTEX_INITIALIZER;
+    acquire(&m);
+    release(&m);
+
+    kputs("Successfully test mutex\n");
+
+    struct semaphore s = SEM_INITIALIZER(1);
+
+    single_semdown(&s);
+    semup(&s);
+
+    kputs("Successfully test semaphore\n");
 
     sleep1();
 }
