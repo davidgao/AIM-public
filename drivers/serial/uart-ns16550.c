@@ -22,9 +22,12 @@
 #endif
 
 #include <sys/types.h>
+#include <sys/param.h>
 #include <aim/console.h>
 #include <aim/device.h>
 #include <aim/mmu.h>
+#include <aim/vmm.h>
+#include <aim/gfp.h>
 
 #include <uart-ns16550-hw.h>
 
@@ -182,6 +185,22 @@ int __early_console_init(struct bus_device *bus, addr_t base, addr_t mapped_base
 	__uart_ns16550_init(&__early_uart_ns16550);
 	__uart_ns16550_enable(&__early_uart_ns16550);
 
+	set_console(early_console_putchar, (void *)premap_addr(DEFAULT_KPUTS));
+
+	if (jump_handlers_add((generic_fp)__jump_handler) != 0)
+		for (;;) ;	/* panic */
+	return 0;
+}
+
+int __console_init(struct bus_device *bus, addr_t base, addr_t mapped_base)
+{
+	__early_console_set_bus(bus, base);
+	__mapped_bus = (struct bus_device *)postmap_addr(bus);
+	__mapped_base = mapped_base;
+
+	__uart_ns16550_init(&__early_uart_ns16550);
+	__uart_ns16550_enable(&__early_uart_ns16550);
+
 	set_console(early_console_putchar, DEFAULT_KPUTS);
 
 	if (jump_handlers_add((generic_fp)__jump_handler) != 0)
@@ -189,9 +208,63 @@ int __early_console_init(struct bus_device *bus, addr_t base, addr_t mapped_base
 	return 0;
 }
 
+#include <platform.h>
+#include <aim/initcalls.h>
+#include <drivers/io/io-mem.h>
+#include <drivers/io/io-port.h>
+
+
+static int console_putc(int c) {
+	struct chr_device *adev = (struct chr_device *)dev_from_name("uart-ns16550");
+	
+	return __uart_ns16550_putchar(adev, c);
+}
+
+static int driver_getc(dev_t dev) {
+	struct chr_device *adev = (struct chr_device *)dev_from_id(dev);	
+	return __uart_ns16550_getchar(adev);
+}
+
+static int driver_putc(dev_t dev, int c) {
+	struct chr_device *adev = (struct chr_device *)dev_from_id(dev);	
+	return __uart_ns16550_putchar(adev, c); 
+}
+
+static struct chr_driver drv = {
+	.class 	= DEVCLASS_CHR,
+	.type 	= DRVTYPE_TTY,	//TODO: check _NORMAL?
+	.open 	= NULL,
+	.close 	= NULL,
+	.new 	= NULL,
+	.read 	= NULL,
+	.write 	= NULL,
+	.getc 	= driver_getc,
+	.putc 	= driver_putc
+
+};
+
+static int __driver_init(void) {
+	
+	struct device *port;
+	port = dev_from_name("portio");
+	
+	struct chr_device *uart;
+	uart = kmalloc(sizeof(*uart), GFP_ZERO);
+	uart->bus = (struct bus_device *)port;	
+	uart->base = UART_BASE;
+
+	register_driver(NOMAJOR, &drv);
+	initdev(uart, DEVCLASS_CHR, "uart-ns16550", NODEV, &drv);
+	dev_add(uart);
+
+	set_console(console_putc, DEFAULT_KPUTS);
+
+	return 0;
+}
+INITCALL_DEV(__driver_init);
+
 #ifdef RAW /* baremetal driver */
 
 #else /* not RAW, or kernel driver */
 
 #endif /* RAW */
-

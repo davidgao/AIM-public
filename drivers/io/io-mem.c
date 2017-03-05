@@ -34,6 +34,9 @@
 #include <aim/io.h>
 #include <aim/mmu.h>
 #include <aim/panic.h>
+#include <aim/vmm.h>
+#include <aim/console.h>
+#include <aim/initcalls.h>
 #include <errno.h>
 
 #include <io-mem.h>
@@ -129,7 +132,8 @@ int io_mem_init(struct bus_device *memory_bus)
 #ifndef RAW
 
 #define DEVICE_MODEL	"io-mem"
-#if 0
+
+#if 1
 static struct bus_driver drv;
 
 static int __new(struct devtree_entry *entry)
