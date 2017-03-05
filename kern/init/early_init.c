@@ -30,6 +30,7 @@
 #include <aim/kalloc.h>
 #include <aim/pmm.h>
 #include <aim/vmm.h>
+#include <aim/initcalls.h>
 #include <drivers/io/io-mem.h>
 #include <drivers/io/io-port.h>
 #include <platform.h>
@@ -87,6 +88,7 @@ void master_early_init(void)
 	early_mapping_clear();
 	mmu_handlers_clear();
 	/* prepare early devices like memory bus and port bus */
+
 	if (early_devices_init() < 0)
 		goto panic;
 	/* other preperations, including early secondary buses */
@@ -97,7 +99,7 @@ void master_early_init(void)
 	) < 0)
 		panic("Early console init failed.\n");
 	kputs("Hello, world!\n");
-
+	
 	get_mem_config();
 	arch_early_init();
 
@@ -131,6 +133,7 @@ int page_allocator_init() {
     return 0;
 }
 
+
 void master_early_continue() {
     master_early_simple_alloc(
     	(void *)premap_addr((uint32_t)&__end), 
@@ -146,17 +149,18 @@ void master_early_continue() {
     kprintf("3. later simple allocator depends on page allocator\n");
     master_later_alloc();
 
+    addr_t temp_addr;
+    temp_addr = pgalloc();
+    kprintf("Test: alloc page 0x%p and is not freed\n", temp_addr);
+    temp_addr = pgalloc();
+    pgfree(temp_addr);
+    kprintf("Test: alloc page 0x%p and is freed\n", temp_addr);
+
     trap_init();
 
-    kprintf("try int 0x20\n");
-    __asm__ __volatile__ (
-    	"mov $0x20, %%eax;"
-    	" int $0x80;"
-    	// "int $0x20;"
-    	::
-    );
+    do_initcalls();
 
-    panic("Trap init done");
+    panic("Device init done");
 
     sleep1();
 }
