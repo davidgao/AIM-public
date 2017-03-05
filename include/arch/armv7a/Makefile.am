@@ -20,7 +20,9 @@ include $(top_srcdir)/env.am
 noinst_HEADERS = \
 	arch-boot.h \
 	arch-io.h \
+	arch-irq.h \
 	arch-mmu.h \
+	arch-sync.h \
 	arch-trap.h \
 	platform.h
 

@@ -23,7 +23,9 @@ SUBDIRS = \
 noinst_HEADERS = \
 	arch-boot.h \
 	arch-io.h \
+	arch-irq.h \
 	arch-mmu.h \
+	arch-sync.h \
 	arch-trap.h \
 	asm.h \
 	cp0regdef.h \
