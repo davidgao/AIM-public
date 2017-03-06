@@ -165,6 +165,10 @@ struct segdesc {
 #define PGROUNDUP(sz)  (((sz)+PGSIZE-1) & ~(PGSIZE-1))
 #define PGROUNDDOWN(a) (((a)) & ~(PGSIZE-1))
 
+#define PGSIZE_4M       (4<<20)
+#define PGROUNDUP_4M(x)     (((x)+PGSIZE_4M-1) & ~(PGSIZE_4M-1))
+#define PGROUNDDOWN_4M(x)   (((x)) & ~(PGSIZE_4M-1))
+
 // Page table/directory entry flags.
 #define PTE_P           0x001   // Present
 #define PTE_W           0x002   // Writeable

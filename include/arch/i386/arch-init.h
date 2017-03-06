@@ -23,6 +23,11 @@ void trap_init();
 
 void startothers(void);
 
+int quick_cpunum();
+void panic_other_cpus();
+void push_ipi(uint8_t intnum);
+uint32_t __get_eip();
+
 #endif	//__ASSEMBLER__
 
 #endif
