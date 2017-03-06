@@ -146,7 +146,6 @@ void master_early_continue() {
     kprintf("3. later simple allocator depends on page allocator\n");
     master_later_alloc();
 
-    
     mpinit();
     lapic_init();
     seginit();
@@ -157,27 +156,41 @@ void master_early_continue() {
     
     startothers();
 
-    kputs("Successfully start other processors\n");
-
-    void panic_other_cpus();
-
-
-    lock_t l = LOCK_INITIALIZER;
-    spin_lock(&l);
-    spin_unlock(&l);
-
-    kputs("Successfully test mutex\n");
-
-    semaphore_t s = SEM_INITIALIZER(2);
-    semaphore_dec(&s);
-    semaphore_inc(&s);
-
-    kputs("Successfully test semaphore\n");
-
-    panic("Done with tests\n");
+    void main_test();
+    main_test();
 
 }
 
 void inf_loop() {
     while(1);
+}
+
+#define NAP 5
+static lock_t lk = LOCK_INITIALIZER;
+static semaphore_t sem = SEM_INITIALIZER(NAP);
+static int critical_count = 300;
+volatile static bool para_test_done = false;
+void para_test() {
+    semaphore_dec(&sem);
+    while(sem.val > 0 && !para_test_done)   // sync all cpu to start together
+        ;
+    while(1) {
+        spin_lock(&lk);             // enter critical section for countdown
+        if(critical_count == 0) {   // about to finish the test
+            kprintf("\ncpu %d done", quick_cpunum());
+            semaphore_inc(&sem);    // submit work
+            para_test_done = true;
+            spin_unlock(&lk);       // unlock late for ordered output
+            return;
+        }
+        kprintf("%d ", critical_count--);   // countdown
+        spin_unlock(&lk);
+    }
+}
+
+void main_test() {
+    while(!(para_test_done && (sem.val == sem.limit)))  // every CPU submit
+        ;
+    kprintf("\n");
+    panic("All processors finished para_test\n"); // panic all cpu
 }

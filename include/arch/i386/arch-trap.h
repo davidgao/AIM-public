@@ -99,4 +99,7 @@ void trap(struct trapframe *tf);
 #define IRQ_ERROR       19
 #define IRQ_SPURIOUS    31
 
+#define T_PANICALL_   0x81
+#define T_SHOWEIP_    0x82
+
 #endif /* _ARCH_TRAP_H */

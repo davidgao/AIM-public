@@ -51,7 +51,7 @@ entrystart32:
   orl     $(CR4_PSE), %eax
   movl    %eax, %cr4
   # Use entrypgdir as our initial page table
-  movl    (ENT_OTHER_CODE_START-12), %eax
+  movl    (ENT_OTHER_CODE_START - 12), %eax
   movl    %eax, %cr3
   # Turn on paging.
   movl    %cr0, %eax

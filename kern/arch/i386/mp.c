@@ -192,9 +192,13 @@ mpmain(void)
   trap_init();
   struct cpu *c = get_gs_cpu();
   xchg(&c->started, 1);
+  
+  sti();
 
-  while(1);
+  void para_test();
+  para_test();
 
+  asm("hlt");
   //TODO: scheduler();     // start running processes
 }
 
@@ -291,4 +295,8 @@ struct proc *get_gs_proc() {
     :"=m"(temp)
   );
   return temp;
+}
+
+int quick_cpunum() {
+  return (get_gs_cpu() - cpus);
 }

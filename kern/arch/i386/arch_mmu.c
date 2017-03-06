@@ -18,9 +18,9 @@ addr_t* kalloc(void);
 int page_index_early_map(pgindex_t *boot_page_index, addr_t paddr,
 	void *vaddr, size_t size) {
     
-    void *va = (void *)PGROUNDDOWN((uint32_t)vaddr);
-    void *end = (void *)PGROUNDUP((uint32_t)vaddr + size - 1);
-    paddr = PGROUNDDOWN(paddr);
+    void *va = (void *)PGROUNDDOWN_4M((uint32_t)vaddr);
+    void *end = (void *)PGROUNDUP_4M((uint32_t)vaddr + size - 1);
+    paddr = PGROUNDDOWN_4M(paddr);
 
     pte_t *pte;
     for(; va <= end; va += PGSIZE_EXT) {

@@ -26,14 +26,13 @@
 #include <proc.h>
 
 typedef struct mutex {
-	uint32_t locked;
+	volatile uint32_t locked;
 
 	char *desc;
 	struct cpu *cpu;
 } lock_t;
 
 #define LOCK_INITIALIZER 	{0, NULL, NULL}
-// #define EMPTY_LOCK(lock)	(UNLOCKED)
 
 static inline
 void spinlock_init(lock_t *m)
@@ -72,7 +71,7 @@ bool spin_lock_once(lock_t *m) {
 	// pushcli();
 	if(holding(m))
 		panic("acquire: trying to lock again");
-	while(xchg(&m->locked, 1) != 0)
+	if(xchg(&m->locked, 1) != 0)
 		return 0;
 	// __snyc_synchronize();
 	m->cpu = get_gs_cpu();
@@ -98,7 +97,7 @@ bool spin_is_locked(lock_t *lock)
 
 /* Semaphore */
 typedef struct {
-	int val;
+	volatile int val;
 	int limit;
 	lock_t mutex;
 
@@ -124,44 +123,26 @@ void semaphore_init2(semaphore_t *sem, int val, char *desc)
 	spinlock_init(&sem->mutex);
 	sem->desc = desc;
 }
-#define MZYDEBUG
+
 static inline
 void semaphore_dec(semaphore_t *s)
 {
-	spin_lock(&s->mutex);
-	if(s->val <= 0) {
-re_ent:
-		spin_unlock(&s->mutex);
-		#ifdef MZYDEBUG
-		int count = 0;
-		bool count_enable = true;
-		#endif 
-		while(s->val <= 0){
-			#ifdef MZYDEBUG
-			count ++;
-			if(count_enable && count > 0x1000) {
-				kprintf("Warning | semaphore_dec: having waited 0x1000 loops for %s\n", s->desc);
-				count_enable = false;
-			}
-			#endif
-		}
-		spin_lock(&s->mutex);
-	}
-	if(s->val <= 0)
-		goto re_ent;
-	s->val --;
-	spin_unlock(&s->mutex);
+	while(s->val <= 0)
+		;
+	int val = s->val;
+	while(!cmpxchg((uint32_t *)&s->val, val, val-1))
+		;
+
 }
 
 static inline
 void semaphore_inc(semaphore_t *s)
 {
-	spin_lock(&s->mutex);
-	s->val ++;
-	if(s->val > s->limit) {
+	int val = s->val;
+	if(val + 1 > s->limit)
 		panic("semaphore_inc: inc overflow");
-	}
-	spin_unlock(&s->mutex);
+	while(!cmpxchg((uint32_t *)&s->val, val, val+1))
+		;
 }
 
 #define SEM_INITIALIZER(x) {(x), (x), LOCK_INITIALIZER, NULL}
@@ -169,4 +150,3 @@ void semaphore_inc(semaphore_t *s)
 #endif /* __ASSEMBLER__ */
 
 #endif /* _ARCH_SYNC_H */
-

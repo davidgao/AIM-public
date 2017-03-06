@@ -12,6 +12,7 @@
 #include <aim/console.h>
 #include <asm.h>
 #include <proc.h>
+#include <arch-init.h>
 
 #define NIDT 256
 
@@ -28,7 +29,6 @@ void idt_init() {
 	SETGATE(idt[T_SYSCALL], 1, SEG_KCODE<<3, vectors[T_SYSCALL], DPL_USER);
 }
 
-int cpunum();
 void trap(struct trapframe *tf) {
 	long ans;
 	if(tf->trapno == T_SYSCALL) {
@@ -43,11 +43,21 @@ void trap(struct trapframe *tf) {
     handle_interrupt(tf->trapno - T_IRQ0);
 		return;
 	}
-  if(tf->trapno == 0x79) {
-    panic("CPU %d panic on temporary signal 0x79\n", cpunum());
+
+  switch(tf->trapno) {
+    case T_PANICALL_:
+      local_panic("INT PANICALL: CPU %d panic\n", quick_cpunum());
+      return;
+    case T_SHOWEIP_:
+      local_panic("INT SHOWEIP: CPU %d at 0x%x\n", quick_cpunum(), __get_eip());
+      return;
   }
-  kprintf("Receive undefined trapno 0x%x\n", tf->trapno);
-	panic("trap: Implement me for others");
+
+  kprintf("CPU %d Receive undefined trapno 0x%x\n", quick_cpunum(), tf->trapno);
+	
+  asm("hlt");
+
+  panic("trap: Implement me\n");
 
 }
 
@@ -56,7 +66,15 @@ void trap_init(void) {
 	idt_init();	// prepare int vectors
 
 	lidt((struct gatedesc *)idt, sizeof(idt));
+}
 
+uint32_t __get_eip() {
+  asm volatile(
+    "mov (%%esp), %%eax;"
+    "ret;"
+    ::
+  );
+  return 0; // to deceive compiler
 }
 
 

@@ -69,7 +69,7 @@ void arch_early_init(void)
 {
 
     arch_load_gdt();
-    set_cr_mmu(); 
+    set_cr_mmu();    
 }
 
 void arch_early_continue() {

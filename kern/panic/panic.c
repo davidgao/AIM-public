@@ -67,8 +67,6 @@ void panic(const char *fmt, ...)
 
 	//local_irq_disable();
 
-	panic_other_cpus();
-
 	va_start(args, fmt);
 	result = vsnprintf(__buf, BUFSIZ, fmt, args);
 	va_end(args);
@@ -79,6 +77,8 @@ void panic(const char *fmt, ...)
 	}
 	kputs(__buf);
 	
+	panic_other_cpus();
+
 	__local_panic();
 }
 

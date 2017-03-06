@@ -184,7 +184,12 @@ lapicstartap(uchar apicid, uint addr)
 
 void panic_other_cpus() {
   lapicw(ICRHI, 0);
-  lapicw(ICRLO, 0x79 | BCAST | LEVEL);
+  lapicw(ICRLO, T_PANICALL_ | BCAST | LEVEL);
+}
+
+void push_ipi(uint8_t intnum) {
+  lapicw(ICRHI, 0);
+  lapicw(ICRLO, (intnum&0xff) | BCAST);
 }
 
 #define CMOS_STATA   0x0a
