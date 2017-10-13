@@ -17,6 +17,8 @@
 
 include $(top_srcdir)/env.am
 
-SUBDIRS = $(ARCH)
-DIST_SUBDIRS = armv7a i386 mips x86_64
+noinst_HEADERS = \
+	arch-boot.h \
+	arch-io.h \
+	asm.h
 
