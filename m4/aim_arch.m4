@@ -25,7 +25,7 @@ AC_DEFUN([AIM_SUPPORT_ARCH], [
 
 AC_DEFUN([AIM_INIT_ARCH], [
 	AIM_ARG_VAR([ARCH], [target architecture])
-	AIM_SUPPORT_ARCH([armv7a i386 i686 mips mips64])
+	AIM_SUPPORT_ARCH([armv7a i386 i686 mips mips64 x86_64])
 	AS_CASE([$ARCH],
 		[arm*], [
 			AS_VAR_SET([__enable_io_mem], [yes])
@@ -49,6 +49,16 @@ AC_DEFUN([AIM_INIT_ARCH], [
 			AS_VAR_SET([__enable_io_port_root], [no])
 		],
 		[i386], [
+			AS_VAR_SET([__with_ram_physbase], [0x01000000])
+			AS_VAR_SET([__with_kern_start], [0x01000000])
+			AS_VAR_SET([__enable_io_mem], [yes])
+			AS_VAR_SET([__enable_io_port], [yes])
+			AS_VAR_SET([__enable_io_mem_root], [yes])
+			AS_VAR_SET([__enable_io_port_root], [yes])
+			AS_VAR_SET([__enable_uart_ns16550], [yes])
+			AS_VAR_SET([__with_primary_console], [uart-ns16550])
+		],
+		[x86_64], [
 			AS_VAR_SET([__with_ram_physbase], [0x01000000])
 			AS_VAR_SET([__with_kern_start], [0x01000000])
 			AS_VAR_SET([__enable_io_mem], [yes])
