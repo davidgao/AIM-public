@@ -17,6 +17,20 @@
 
 include $(top_srcdir)/env.am
 
-SUBDIRS = $(ARCH)
-DIST_SUBDIRS = armv7a i386 mips x86_64
+dist_noinst_DATA = boot.lds.S
+
+noinst_LTLIBRARIES = \
+	libentry.la \
+	libarch.la
+
+libentry_la_SOURCES = \
+	bootasm.S
+libentry_la_CPPFLAGS = $(AM_CPPFLAGS_NOPIC)
+libentry_la_CFLAGS = $(AM_CFLAGS_NOPIC) -Os
+libentry_la_CCASFLAGS = $(AM_CCASFLAGS_NOPIC)
+
+libarch_la_SOURCES =
+libarch_la_CPPFLAGS = $(AM_CPPFLAGS_NOPIC)
+libarch_la_CFLAGS = $(AM_CFLAGS_NOPIC) -Os
+libarch_la_CCASFLAGS = $(AM_CCASFLAGS_NOPIC)
 

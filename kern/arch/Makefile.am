@@ -18,5 +18,5 @@
 include $(top_srcdir)/env.am
 
 SUBDIRS = $(ARCH)
-DIST_SUBDIRS = armv7a i386 mips
+DIST_SUBDIRS = armv7a i386 mips x86_64
 
