@@ -22,6 +22,7 @@
 
 #include <sys/types.h>
 #include <aim/boot.h>
+#include <aim/io.h>
 #include <elf.h>
 #include <asm.h>
 

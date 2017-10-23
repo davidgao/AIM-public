@@ -30,17 +30,23 @@ uint8_t inb(uint16_t port)
 	return data;
 }
 
+#pragma GCC diagnostic ignored "-Wunused-parameter" 	/* remove after impl */
+__attribute__ ((warning("Implement Me!"))) 		/* remove after impl */
 static inline
 uint16_t inw(uint16_t port)
 {
 	return 0;
 }
+#pragma GCC diagnostic pop				/* remove after impl */
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"	/* remove after impl */
+__attribute__ ((warning("Implement Me!"))) 		/* remove after impl */
 static inline
 uint32_t inl(uint16_t port)
 {
 	return 0;
 }
+#pragma GCC diagnostic pop				/* remove after impl */
 
 static inline
 void insl(int port, void *addr, int cnt)
@@ -69,15 +75,21 @@ void outb(uint16_t port, uint8_t data)
 	);
 }
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"	/* remove after impl */
+__attribute__ ((warning("Implement Me!"))) 		/* remove after impl */
 static inline
 void outw(uint16_t port, uint8_t data)
 {
 }
+#pragma GCC diagnostic pop				/* remove after impl */
 
+#pragma GCC diagnostic ignored "-Wunused-parameter"	/* remove after impl */
+__attribute__ ((warning("Implement Me!"))) 		/* remove after impl */
 static inline
 void outl(uint16_t port, uint8_t data)
 {
 }
+#pragma GCC diagnostic pop				/* remove after impl */
 
 static inline
 void stosb(void *addr, int data, int cnt)
