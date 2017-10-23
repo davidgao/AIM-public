@@ -16,19 +16,3 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif /* HAVE_CONFIG_H */
-
-#include <sys/types.h>
-#include <aim/boot.h>
-#include <aim/io.h>
-#include <elf.h>
-#include <asm.h>
-
-__noreturn
-void bootmain(void)
-{
-	while (1);
-}
-
