@@ -112,7 +112,7 @@ static struct device *__next(struct device *dev, void **savep)
 		*savep = list_next_entry((struct device_entry *)(*savep),
 		    struct device_entry, node);
 	}
-	if (*savep == &__head)
+	if (*savep == list_entry(&__head, struct device_entry, node))
 		return NULL;
 	else
 		return ((struct device_entry *)(*savep))->dev;
