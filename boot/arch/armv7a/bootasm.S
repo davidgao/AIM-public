@@ -24,6 +24,27 @@
 
 .globl _start
 _start:
+	/* Clear Interupt */
+	cli
+	/* Clear Directory */
+	cld
+	/* Clear Segment Registers */
+	xor	%ds, %ds
+	xor	%es, %es
+	xor	%ss, %ss
+	/* Disable A20 Compatability */
+seta20.1:
+	in	$0x64, %al
+	test	$0x2, %al
+	jnz	seta20.1
+	mov	$0xd1, %al
+	out	%al, $0x64
+seta20.2:
+	in	$0x64, %al
+	test	$0x2, %al
+	jnz	seta20.2
+	mov	$0xdf, %al
+	out	%al, $0x60
 
 .text
 
