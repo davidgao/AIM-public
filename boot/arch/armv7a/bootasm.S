@@ -45,8 +45,38 @@ seta20.2:
 	jnz	seta20.2
 	mov	$0xdf, %al
 	out	%al, $0x60
+	/* Load GDT and Start Protected Mode */
+	lgdt	gdtdesc
+	mov	%cr0, %eax
+	or	$CR0_PE, %eax
+	mov	%eax, %cr0
+	ljmp	$(SEG_KCODE << 3), $bootasm
 
 .text
 
 bootasm:
+	/* Set Up Segments */
+	mov	$(SEG_KDATA<<3), %ax
+	mov	%ax, %ds
+	mov	%ax, %es
+	mov	%ax, %ss
+	xor	%ax, %ax
+	mov	%ax, %fs
+	mov	%ax, %gs
+	/* Set Up Stack */
+	mov	$stacktop, %esp
+	call	bootmain
+	/* Spin in Case of Return */
+spin:
+	jmp	spin
+	
+.data
+.p2align 2
+gdt:
+	SEG_NULL				// null seg
+	SEG(STA_X|STA_R, 0x0, 0xffffffff)	// code seg
+	SEG(STA_W, 0x0, 0xffffffff)		// data seg
 
+gdtdesc:
+	.word	(gdtdesc - gdt - 1)	// sizeof(gdt) - 1
+	.long	gdt			// address of gdt
