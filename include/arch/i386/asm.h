@@ -54,7 +54,7 @@ void outb(uint16_t port, uint8_t data)
 #pragma GCC diagnostic ignored "-Wunused-parameter"	/* remove after impl */
 __attribute__ ((warning("Implement Me!"))) 		/* remove after impl */
 static inline
-void outw(uint16_t port, uint8_t data)
+void outw(uint16_t port, uint16_t data)
 {
 }
 #pragma GCC diagnostic pop				/* remove after impl */
@@ -62,7 +62,7 @@ void outw(uint16_t port, uint8_t data)
 #pragma GCC diagnostic ignored "-Wunused-parameter"	/* remove after impl */
 __attribute__ ((warning("Implement Me!"))) 		/* remove after impl */
 static inline
-void outl(uint16_t port, uint8_t data)
+void outl(uint16_t port, uint32_t data)
 {
 }
 #pragma GCC diagnostic pop				/* remove after impl */
