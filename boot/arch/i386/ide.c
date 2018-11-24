@@ -22,25 +22,26 @@
 
 #include <sys/types.h>
 #include <aim/boot.h>
+#include <aim/io.h>
 #include <asm.h>
 
 static inline
 void waitdisk(void)
 {
-	while ((inb(0x1F7) & 0xC0) != 0x40);
+	while ((in8(0x1F7) & 0xC0) != 0x40);
 }
 
-void readsect(void *dst, uint32_t offset)
+void readsect(void *dst, off_t offset)
 {
 	waitdisk();
-	outb(0x1F2, 1);
-	outb(0x1F3, offset);
-	outb(0x1F4, offset >> 8);
-	outb(0x1F5, offset >> 16);
-	outb(0x1F6, (offset >> 24) | 0xE0);
-	outb(0x1F7, 0x20);
+	out8(0x1F2, 1);
+	out8(0x1F3, (uint8_t)offset);
+	out8(0x1F4, (uint8_t)(offset >> 8));
+	out8(0x1F5, (uint8_t)(offset >> 16));
+	out8(0x1F6, (uint8_t)(offset >> 24) | 0xE0);
+	out8(0x1F7, 0x20);
 
 	waitdisk();
-	insl(0x1F0, dst, SECT_SIZE);
+	insl(0x1F0, dst, SECT_SIZE / sizeof(uint32_t));
 }
 

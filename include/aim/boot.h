@@ -23,7 +23,7 @@
 
 extern uint8_t mbr[];
 
-void readsect(void *dst, uint32_t offset);
+void readsect(void *dst, off_t offset);
 
 #endif /* !__ASSEMBLER__ */
 

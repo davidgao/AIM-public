@@ -49,7 +49,7 @@ uint32_t inl(uint16_t port)
 #pragma GCC diagnostic pop				/* remove after impl */
 
 static inline
-void insl(int port, void *addr, int cnt)
+void insl(int port, void *addr, size_t cnt)
 {
 	asm volatile (
 		"rep insl;"
@@ -92,7 +92,7 @@ void outl(uint16_t port, uint32_t data)
 #pragma GCC diagnostic pop				/* remove after impl */
 
 static inline
-void stosb(void *addr, int data, int cnt)
+void stosb(void *addr, uint8_t data, size_t cnt)
 {
 	asm volatile (
 		"rep stosb;"

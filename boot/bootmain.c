@@ -30,7 +30,7 @@
 
 static uint8_t elf_hdr_buf[ELF_BUF_SIZE];
 
-void readseg(void *pa, uint32_t count, uint32_t offset)
+void readseg(void *pa, size_t count, off_t offset)
 {
 	void *epa = pa + count;
 	// Round down to sector boundary.
@@ -45,8 +45,9 @@ void readseg(void *pa, uint32_t count, uint32_t offset)
 	}
 }
 
+#pragma GCC diagnostic ignored "-Wunused-parameter" 	/* remove after impl */
 static inline
-bool is_elf(elf_hdr *elf)
+bool is_elf(const elf_hdr *elf)
 {
 	/*static const uint8_t magic[] = {
 		0x7f, 0x45, 0x4c, 0x46,
@@ -54,11 +55,12 @@ bool is_elf(elf_hdr *elf)
 		0x00, 0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00, 0x00
 	};
-	for (int i = 0; i < sizeof(magic); i++) {
+	for (int i = 0; i < (int)sizeof(magic); i++) {
 		if (elf->e_ident[i] != magic[i]) return false;
 	}*/
 	return true;
 }
+#pragma GCC diagnostic pop				/* remove after impl */
 
 static inline
 uint32_t get_lba(int n) // 1-4
@@ -75,7 +77,7 @@ void bootmain(void)
 {
 	elf_hdr *elf = (elf_hdr *)&elf_hdr_buf[0];
 	elf_phdr *ph, *eph;
-	uint32_t base = get_lba(2) * SECT_SIZE;
+	uint32_t base = get_lba(2) * SECT_SIZE; // TODO boot any partition
 	void (*entry)(void);
 	void *pa;
 
